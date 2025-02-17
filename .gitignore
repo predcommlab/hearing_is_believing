@@ -10,6 +10,12 @@
 ./analysis/online/data/*
 ./analysis/eeg/data/*
 
+./analysis/spaces/dumps/*
+./analysis/spaces/llama-7b/*
+./analysis/spaces/glove-german/*
+./analysis/spaces/text-embedding-ada-002/*
+./analysis/spaces/bert-base-german-cased/*
+
 *.wav
 *.npy
 *.gz.pkl
