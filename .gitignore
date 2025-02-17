@@ -1,0 +1,7 @@
+./experiments/eeg/models/*
+./experiments/eeg/resources/*
+./experiments/eeg/rtfe/*
+./experiments/online/resources/*.wav
+./experiments/online/data/*
+./experiments/validation/data/*
+./experiments/validation/resources/*.wav

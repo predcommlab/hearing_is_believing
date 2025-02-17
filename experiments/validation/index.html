@@ -1,0 +1,440 @@
+<!DOCTYPE  html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Was h&#246;rst du?</title>
+        <script src="./resources/js/jquery-3.6.1.min.js"></script>
+        <script src="./resources/js/jspsych-6.0.0.js"></script>
+        <script src="./resources/js/jspsych-pavlovia-3.0.0.js"></script>
+        <script src="./resources/js/plugins.fullscreen-1.0.0.js"></script>
+        <script src="./resources/js/plugins.instructions-1.0.0.js"></script>
+        <script src="./resources/js/plugins.html-button-response.js"></script>
+        <script src="./resources/js/plugins.headphone_check.js"></script>
+        <script src="./resources/js/plugins.informed_consent_uke.js"></script>
+        <script src="./resources/js/plugins.2afc_audio_visual.js"></script>
+        <link href="./resources/css/jspsych-6.0.0.css" rel="stylesheet" type="text/css" />
+        <link href="./resources/css/plugins.2afc_audio_visual.css" rel="stylesheet" type="text/css" />
+        <style>
+            /*
+            Make sure elements are nice and centred (and not too far out).
+            */
+
+            .jspsych-display-element {
+                max-width: 1400px; 
+                margin: 0 auto !important; 
+                float: none !important; 
+            }
+          </style>
+    </head>
+    <body></body>
+    <script>
+        // flags
+        const __flag_local = !(window.location.hostname == "run.pavlovia.org");
+        const __flag_fastmode = false;
+        const __flag_requireid = true;
+
+        // setup study descriptors
+        const study_title = 'Der Einfluss von semantischen Erwartungen auf die Wahrnehmung in menschlicher Kommunikation';
+        const study_subtitle = 'Experiment 1.a: Was h&#246;rst du? (online)';
+        const study_language = 'de';
+        const study_duration = 35;
+        const study_hourly_rate = '10,25 Euro';
+        const study_block_length = 40;
+        const study_repeats = 2;
+        const study_stimulus_file = './resources/js/stimuli.json';
+        const study_countdown = 5000;
+        const study_key_left = 'LeftArrow';
+        const study_key_left_desc = '<-';
+        const study_key_left_long = '<- (Pfeiltaste links)';
+        const study_key_right = 'RightArrow';
+        const study_key_right_desc = '->';
+        const study_key_right_long = '-> (Pfeiltaste rechts)';
+        const study_buffer_before_redirect = 2500;
+
+        // participant descriptors
+        const prolific_pid = ('PROLIFIC_PID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().PROLIFIC_PID : undefined);
+        const prolific_eid = ('STUDY_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().STUDY_ID : undefined);
+        const prolific_sid = ('SESSION_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().SESSION_ID : undefined);
+        const prolific_cid = 'C1A89WGR';
+        const prolific_url = 'https://app.prolific.co/submissions/complete?cc={0}';
+        const pid = ('pid' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().pid : prolific_pid)
+
+        function run_experiment(data) {
+            // ensure pid exists, unless specified otherwise
+            if (__flag_requireid && (typeof(pid) === 'undefined' || pid.length < 1)) {
+                alert('Es wurde keine Probanden-ID gefunden. Bitte wenden Sie sich an die Experimentleitung.')
+                return;
+            }
+
+            // setup timeline & preloads
+            let timeline = [];
+            let preload_audio = [];
+            let preload_images = [];
+
+            // setup pavlovia session
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "init"
+                });
+            }
+
+            if (!__flag_fastmode) {
+                // setup brief & informed consent
+                timeline.push({
+                    type: "informed_consent_uke",
+                    study_language: study_language,
+                    study_title: study_title,
+                    study_subtitle: study_subtitle,
+                    study_centre: "die Arbeitsgruppe f&#252;r Kommunikation des Instituts f&#252;r systemische Neurowissenschaften am Universit&#228;tsklinikum Hamburg-Eppendorf (UKE)",
+                    study_purpose: ", wie das Gehirn semantische Erwartungen erwirbt und verwendet",
+                    study_description: "Zun&#228;chst finden einige kurze Vortests statt, dann wird das Hauptexperiment erkl&#228;rt. " + 
+                                    "Dieses dauert in etwa " + study_duration.toString() + " Minuten. " + 
+                                    "Dabei h&#246;ren Sie schwer verst&#228;ndliche Aufnahmen und entscheiden dann per Tastatur, welches Wort Sie geh&#246;rt zu haben glauben.",
+                    study_inclusion_criteria: ulist('Gesunde Proband:innen, die voll gesch&#228;fts- und aufkl&#228;rungsf&#228;hig sind',
+                                                    'Alter: 18-40 Jahre',
+                                                    'Muttersprache: Deutsch',
+                                                    'Einwilligung in die Untersuchung'),
+                    study_exclusion_criteria: ulist('Einschr&#228;nkungen des Geh&#246;rs (bspw. Taubheit, schwerer Tinnitus, etc.)',
+                                                    'ADS/ADHS',
+                                                    'Dyslexie'),
+                    study_contact_person: 'Dr. Helen Blank',
+                    study_duration_in_minutes: study_duration,
+                    study_hourly_rate: study_hourly_rate,
+                    study_privacy_contact_person: 'Dr. Helen Blank',
+                    study_privacy_contact_centre: 'Institut f&#252;r systemische Neurowissenschaften am Universit&#228;tsklinikum Hamburg-Eppendorf, UKE',
+                    study_privacy_contact_address: 'Martinistra&#223;e 52 / W34, 20246 Hamburg',
+                    study_privacy_contact_phone: '(040) 7410-57160',
+                    study_privacy_contact_email: 'hblank@uke.de'
+                });
+
+                // setup head phone check
+                timeline.push({
+                    type: "headphone_check",
+                    study_language: study_language,
+                    study_title: study_title,
+                    study_subtitle: study_subtitle,
+                    no: 6,
+                    threshold: 5/6,
+                    file_calibration: './resources/audio/noise_calib_stim.wav',
+                    file_stim1: './resources/audio/antiphase_HC_IOS.wav',
+                    corr_stim1: 3,
+                    file_stim2: './resources/audio/antiphase_HC_ISO.wav',
+                    corr_stim2: 2,
+                    file_stim3: './resources/audio/antiphase_HC_OIS.wav',
+                    corr_stim3: 3,
+                    file_stim4: './resources/audio/antiphase_HC_OSI.wav',
+                    corr_stim4: 2,
+                    file_stim5: './resources/audio/antiphase_HC_SIO.wav',
+                    corr_stim5: 1,
+                    file_stim6: './resources/audio/antiphase_HC_SOI.wav',
+                    corr_stim6: 1
+                });
+
+                // make head phone check data preloadable
+                preload_audio = preload_audio.concat(['./resources/audio/antiphase_HC_IOS.wav',
+                                                      './resources/audio/antiphase_HC_ISO.wav',
+                                                      './resources/audio/antiphase_HC_OIS.wav',
+                                                      './resources/audio/antiphase_HC_OSI.wav',
+                                                      './resources/audio/antiphase_HC_SIO.wav',
+                                                      './resources/audio/antiphase_HC_SOI.wav',
+                                                      './resources/audio/noise_calib_stim.wav']);
+
+                // setup full screen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscren_mode: true,
+                    message: '<p>Das Experiment wird nun in den Vollbild-Modus geschaltet.</p>',
+                    button_label: "Weiter"
+                });
+
+                // setup concrete instructions
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        paragraphs(
+                            bold('Einweisung ins Hauptexperiment'),
+                            'Im folgenden werden Sie nur schwer verst&#228;ndliche Worte h&#246;ren. ' +
+                                'Nach jedem Wort werden Ihnen zwei Optionen gezeigt. ' + 
+                                'Eine Option befindet sich auf der linken und eine auf der rechten Bildschirmseite. ' + 
+                                'Ihre Aufgabe ist es, diejenige Option per Tastatur auszuw&#228;hlen, die Sie glauben, geh&#246;rt zu haben.',
+                            'Dazu dr&#252;cken Sie entweder `{0}` f&#252;r die linke oder `{1}` f&#252;r die rechte Option. '.format(study_key_left_long, study_key_right_long) + 
+                                'Wenn Sie beispielsweise ein Wort h&#246;ren, das Sie f&#252;r `Hummel` halten, und Ihre Antwortm&#246;glichkeiten `Bummel | Hummel` sind, dann w&#252;rden Sie `{0}` dr&#252;cken.'.format(study_key_right_desc),
+                            'F&#252;r jede dieser Entscheidungen haben Sie drei Sekunden Zeit. ' + 
+                                'Sobald die Zeit abgelaufen ist, wird die Entscheidung automatisch &#252;bersprungen.',
+                            'Dr&#252;cken Sie `{0}`, um zur n&#228;chsten Seite zu gelangen.'.format(study_key_right_desc)
+                        ),
+                        paragraphs(
+                            bold('Einweisung ins Hauptexperiment'),
+                            'Das Verstehen der Worte und die damit verbundene Entscheidung wird Ihnen m&#246;glicherweise sehr schwer fallen. ' + 
+                                'Da Sie nur drei Sekunden Zeit haben, um eine Entscheidung zu treffen, sollten Sie nicht lange nachdenken. ' + 
+                                'Stattdessen ist es wichtig, dass Sie auf Ihr Bauchgef&#252;hl h&#246;ren und so schnell wie m&#246;glich eine Entscheidung treffen.',
+                            'Dar&#252;ber hinaus sollten Sie w&#228;hrend dem laufenden Experiment keine eigenen Pausen einlegen. ' + 
+                                'Sie werden w&#228;hrend des Experiments in regelm&#228;&#223;igen Abst&#228;nden immer wieder die M&#246;glichkeit einer Pause angeboten bekommen. ' + 
+                                'Versuchen Sie also, diese wahrzunehmen, und das Experiment ungest&#246;rt durchzuf&#252;hren.',
+                            'Dr&#252;cken Sie `{0}`, um zur n&#228;chsten Seite zu gelangen.'.format(study_key_right_desc),
+                            'Dr&#252;cken Sie `{0}`, um zur vorigen Seite zu gelangen, falls Sie diese noch einmal lesen m&#246;chten.'.format(study_key_left_desc)
+                        ),
+                        paragraphs(
+                            bold('Einweisung ins Hauptexperiment'),
+                            'Das Experiment wird in etwa ' + study_duration.toString() + ' Minuten dauern. ' + 
+                                'Sie k&#246;nnen das Experiment nicht zwischenspeichern und sp&#228;ter vervollst&#228;ndigen. ' + 
+                                'Gehen Sie also sicher, dass Sie nun genug Zeit haben, um das Experiment vollst&#228;ndig abschlie&#223;en zu k&#246;nnen.',
+                            'Beginnen Sie das Experiment dar&#252;ber hinaus bitte nur, wenn Sie sich in einer ruhigen und ungest&#246;rten Umgebung befinden. ' + 
+                                'Das ist wichtig, da die Worte ohnehin nur schwer verst&#228;ndlich sind, und zus&#228;tzliche Ger&#228;usche die Wahrnehmung verf&#228;lschen k&#246;nnten.',
+                            'Sind Sie bereit?',
+                            'Dr&#252;cken Sie `{0}`, um den &#220;bungsblock zu starten, oder `{1}`, um zur letzten Erkl&#228;rung zur&#252;ckzukehren.'.format(study_key_right_desc, study_key_left_desc)
+                        )
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                });
+            }
+
+            // add countdown for practice trials
+            timeline.push({
+                type: 'html-button-response',
+                stimulus: '<p id="timer">Der &#220;bungsblock beginnt in... <span id="countdown">' + (study_countdown / 1000).toString() + '</span></p>',
+                choices: ['Weiter'],
+                on_load: function() {
+                    let start_time = performance.now();
+                    $('button').hide();
+                    
+                    let interval = setInterval(() => {
+                        let remaining_time = study_countdown - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+                        
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            $('.jspsych-btn').click();
+                            clearInterval(interval);
+                        }
+                    }, 100);
+                }
+            });
+
+            // setup practice trials
+            let practice_trials = [{stimulus: './audio_morphed/Gehwege-Gehege_1-2_12ch_0.50_r1_cs.wav', target: 'Gehwege', d1: 'Gehege'},
+                                   {stimulus: './audio_morphed/Gischt-mischt_2-2_12ch_0.50_r1_cs.wav', target: 'Gischt', d1: 'mischt'},
+                                   {stimulus: './audio_morphed/Mehl-mal_1-1_12ch_0.50_r1_cs.wav', target: 'Mehl', d1: 'mal'},
+                                   {stimulus: './audio_morphed/Brühe-Brücke_1-2_12ch_0.50_r1_cs.wav', target: 'Brühe', d1: 'Brücke'},
+                                   {stimulus: './audio_morphed/Goethe-Göre_2-1_12ch_0.50_r1_cs.wav', target: 'Goethe', d1: 'Göre'},
+                                   {stimulus: './audio_morphed/Inszenierung-Regierung_1-1_12ch_0.50_r1_cs.wav', target: 'Inszenierung', d1: 'Regierung'},
+                                   {stimulus: './audio_morphed/Monarchie-Nostalgie_2-2_12ch_0.50_r1_cs.wav', target: 'Monarchie', d1: 'Nostalgie'},
+                                   {stimulus: './audio_morphed/Beschluss-Genuss_1-1_12ch_0.50_r1_cs.wav', target: 'Beschluss', d1: 'Genuss'},
+                                   {stimulus: './audio_morphed/Starkstrom-Symptom_2-2_12ch_0.50_r1_cs.wav', target: 'Starkstrom', d1: 'Symptom'},
+                                   {stimulus: './audio_morphed/Stecker-Sprecher_1-2_12ch_0.50_r1_cs.wav', target: 'Stecker', d1: 'Sprecher'},
+                                   {stimulus: './audio_morphed/modern-ungern_1-1_12ch_0.50_r1_cs.wav', target: 'modern', d1: 'ungern'},
+                                   {stimulus: './audio_morphed/Tattoo-dazu_1-1_12ch_0.50_r1_cs.wav', target: 'Tattoo', d1: 'dazu'}];
+            
+            // randomise practice block
+            let practice = [...Array(practice_trials.length).keys()];
+            practice.sort(() => Math.random() - 0.5);
+
+            // add practice trials
+            for (let i = 0; i < practice_trials.length; i++) {
+                // place target
+                let target_position = Math.floor(Math.random() * 2);
+
+                // add trial to timeline
+                timeline.push({
+                    type: "2afc_audio_visual",
+                    no: -1,
+                    block: -1,
+                    prime: null,
+                    stimulus: practice_trials[practice[i]].stimulus,
+                    stimulus_path: "./audio_morphed",
+                    is_control: false,
+                    option_left: (target_position == 0) ? practice_trials[practice[i]].target : practice_trials[practice[i]].d1,
+                    option_right: (target_position == 0) ? practice_trials[practice[i]].d1 : practice_trials[practice[i]].target,
+                    target_position: (target_position == 0) ? 'left' : 'right',
+                    enable_prime: false,
+                    enable_feedback: false,
+                    key_left: 'LeftArrow',
+                    key_right: 'RightArrow'
+                });
+
+                // make preloadable
+                preload_audio.push(practice_trials[practice[i]].stimulus);
+            }
+
+            // add intermezzo before main experiment
+            timeline.push({
+                type: "instructions",
+                pages: [
+                    paragraphs(
+                        bold('Start des Hauptexperiments'),
+                        'Sie haben den &#220;bungsblock abgeschlossen. Vielleicht sind Ihnen manche Entscheidungen dabei nicht leicht gefallen. ' + 
+                            'Denken Sie im Folgenden daran, dass die Entscheidungen schnell getroffen werden sollten. ' + 
+                            'Wählen Sie also so schnell wie m&#246;glich diejenige Option, von der Sie am ehesten glauben, dass Sie sie geh&#246;rt haben.',
+                        'Sind Sie bereit?',
+                        'Dr&#252;cken Sie `{0}`, um mit dem Hauptexperiment zu beginnen.'.format(study_key_right_desc)
+                    )
+                ],
+                allow_keys: true,
+                key_backward: study_key_left,
+                key_forward: study_key_right,
+                show_clickable_nav: true,
+                button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+            });
+
+            // add countdown for main experiment
+            timeline.push({
+                type: 'html-button-response',
+                stimulus: '<p id="timer">Das Experiment beginnt in... <span id="countdown">' + (study_countdown / 1000).toString() + '</span></p>',
+                choices: ['Weiter'],
+                on_load: function() {
+                    let start_time = performance.now();
+                    $('button').hide();
+                    
+                    let interval = setInterval(() => {
+                        let remaining_time = study_countdown - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+                        
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            $('.jspsych-btn').click();
+                            clearInterval(interval);
+                        }
+                    }, 100);
+                }
+            });
+            
+            // track blocks
+            let current_block = 0;
+
+            // loop over repetitions
+            for (let r = 0; r < study_repeats; r++) {
+                // randomise trials
+                let trials = [...Array(data.length).keys()];
+                trials.sort(() => Math.random() - 0.5);
+                
+                // create individual trials
+                for (let i = 0; i < trials.length; i++) {
+                    // insert break if necessary
+                    if ((i % study_block_length) == 0 && i > 0) {
+                        timeline.push({
+                            type: "instructions",
+                            pages: [
+                                paragraphs(
+                                    bold("Pause"),
+                                    'Sie haben nun {0} von {1} Worten geh&#246;rt. '.format(((r*(trials.length))+i).toString(), (study_repeats*trials.length).toString()) + 
+                                        'Nehmen Sie eine kurze Pause.',
+                                    'Wenn Sie bereit sind, dann dr&#252;cken Sie `{0}`, um mit dem Experiment fortzufahren.'.format(study_key_right_desc)
+                                )
+                            ],
+                            allow_keys: true,
+                            key_backward: study_key_left,
+                            key_forward: study_key_right,
+                            show_clickable_nav: true,
+                            button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                            button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                        });
+
+                        current_block += 1;
+                    }
+
+                    // place target
+                    let target_position = Math.floor(Math.random() * 2);
+
+                    // add trial to timeline
+                    timeline.push({
+                        type: "2afc_audio_visual",
+                        no: (r*trials.length)+i,
+                        block: current_block,
+                        prime: null,
+                        stimulus: data[trials[i]]["file" + (r+1).toString()],
+                        stimulus_path: "./audio_morphed",
+                        is_control: Boolean(data[trials[i]].is_control),
+                        option_left: (target_position == 0) ? data[trials[i]].target : data[trials[i]].d1,
+                        option_right: (target_position == 0) ? data[trials[i]].d1 : data[trials[i]].target,
+                        target_position: (target_position == 0) ? 'left' : 'right',
+                        enable_prime: false,
+                        enable_feedback: false,
+                        key_left: 'LeftArrow',
+                        key_right: 'RightArrow'
+                    });
+
+                    // make preloadable
+                    preload_audio.push(data[trials[i]]["file" + (r+1).toString()]);
+                }
+            }
+
+            if (!__flag_fastmode) {
+                // setup debrief
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        paragraphs(
+                            bold('Abschluss des Hauptexperiments'),
+                            'Sie haben das Experiment erfolgreich abgeschlossen. ' + 
+                                'Wir bedanken uns herzlich f&#252;r Ihre Teilnahme und Ihren Beitrag zur Forschung. ' + 
+                                'Sollten Sie weitere Fragen bez&#252;glich des Experiments haben, wenden Sie sich bitte an die Experimentleitung.',
+                            bold('Bitte schlie&#223;en Sie das Experiment noch nicht') + ', sondern dr&#252;cken Sie `{0}`, um das Experiment abzuschliessen. '.format(study_key_right_desc) + 
+                                'Das ist notwendig, um wieder zu Prolific zu gelangen und Ihre Bezahlung zu erhalten.'
+                        )
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                });
+
+                // setup exit from fullscreen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscreen_mode: false
+                });
+            }
+            
+
+            // setup pavlovia exit
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "finish",
+                    participantId: pid
+                });
+            }
+
+            // setup wrap up
+            let on_finish = !__flag_local && (typeof(prolific_pid) !== 'undefined') &&
+                                             (typeof(prolific_cid) !== 'undefined') ? () => {
+                // redirect to prolific
+                setTimeout(() => { 
+                    window.location = prolific_url.format(prolific_cid);
+                }, study_buffer_before_redirect);
+            } : () => {
+                // print data
+                jsPsych.data.displayData('csv');
+            };
+
+            // setup identifiers
+            jsPsych.data.addProperties({pid: pid, 
+                                        prolific_pid: prolific_pid,
+                                        prolific_eid: prolific_eid,
+                                        prolific_sid: prolific_sid});
+
+            // launch experiment
+            jsPsych.init({timeline: timeline,
+                          preload_audio: preload_audio,
+                          preload_images: preload_images,
+                          on_finish: on_finish});
+        }
+        
+        $().ready(function(){
+            fetch(study_stimulus_file)
+            .then((r) => r.json())
+            .then((json) => run_experiment(json));
+        });
+    </script>
+</html>

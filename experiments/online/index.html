@@ -1,0 +1,903 @@
+<!DOCTYPE  html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Was h&#246;ren Sie?</title>
+        <script src="./resources/js/jquery-3.6.1.min.js"></script>
+        <script src="./resources/js/jspsych-6.0.0.js"></script>
+        <script src="./resources/js/jspsych-pavlovia-3.0.0.js"></script>
+        <script src="./resources/js/plugins.fullscreen-1.0.0.js"></script>
+        <script src="./resources/js/plugins.instructions-1.0.0.js"></script>
+        <script src="./resources/js/plugins.html-button-response.js"></script>
+        <script src="./resources/js/plugins.survey-multi-choice.js"></script>
+        <script src="./resources/js/plugins.call-function.js"></script>
+        <script src="./resources/js/plugins.headphone_check.js"></script>
+        <script src="./resources/js/plugins.informed_consent_uke.js"></script>
+        <script src="./resources/js/plugins.2afc_audio_visual.js"></script>
+        <script src="./resources/js/plugins.image_categorisation.js"></script>
+        <script src="./resources/js/plugins.word_categorisation_circle.js"></script>
+        <link href="./resources/css/jspsych-6.0.0.css" rel="stylesheet" type="text/css" />
+        <style>
+            /*
+            Make sure elements are nice and centred (and not too far out).
+            */
+
+            .jspsych-display-element {
+                max-width: 1400px; 
+                margin: 0 auto !important; 
+                float: none !important; 
+            }
+          </style>
+    </head>
+    <body></body>
+    <script>
+        // flags
+        const __flag_local = !(window.location.hostname == "run.pavlovia.org");
+        const __flag_fastmode = ('fm' in jsPsych.data.urlVariables());
+        const __flag_requireid = true;
+        const __flag_hc = !('dhc' in jsPsych.data.urlVariables());
+
+        // setup study descriptors
+        const study_title = 'Der Einfluss von Erwartungen auf die Wahrnehmung in menschlicher Kommunikation'; // title of the study (informed consent)
+        const study_subtitle = 'Experiment 1.c: Was h&#246;ren Sie? (online)'; // subtitle of the study (informed consent)
+        const study_language = 'de'; // language of the study (for plugin config)
+        const study_duration = 35; // duration of the study (in minutes)
+        const study_hourly_rate = '10,30 Euro'; // hourly pay (arbitrary units)
+        const study_block_length = 40; // length of blocks (in items)
+        const study_min_type_repetitions = 1; // minimum number of consecutive same-type presentations (for pseudorandomisation)
+        const study_max_type_repetitions = 5; // maximum number of consecutive same-type presentations (for pseudorandomisation)
+        const study_buffer_token_repetitions = 3; // minimum number of trials between same tokens (for pseudorandomisation)
+        const study_stimulus_file = './resources/js/stimuli.json'; // stimulus file to load
+        const study_countdown = 5000; // countdown before practice & main blocks (in ms)
+        const study_key_left = 'LeftArrow'; // key value for left presses (in jsPsych)
+        const study_key_left_desc = '&#8592;'; // shortened key descriptor left (for instructions)
+        const study_key_left_long = '&#8592; (Pfeiltaste links)';  // long key descriptor left (for instructions)
+        const study_key_right = 'RightArrow'; // key value for right presses (in jsPsych)
+        const study_key_right_desc = '&#8594;'; // shortened key descriptor right (for instructions)
+        const study_key_right_long = '&#8594; (Pfeiltaste rechts)'; // long key descriptor right (for instructions)
+        const study_buffer_before_redirect = 2500; // buffer time before redirecting on completion (in ms)
+        const study_buffer_before_rejection = 10000; // buffer time before prematurely redirecting (in ms)
+        const study_enable_feedback = true; // should feedback be enabled?
+        const study_enable_feedback_manipulation = false; // should trial-wise feedback be manipulated?
+        const study_enable_feedback_trial = (trial) => { return (trial.is_control ? Math.random() > 0.8 : true); }; // how do we do trial-wise feedback manipulation (if necessary)?
+        const study_enable_primes = true; // should primes be enabled?
+        const study_enable_persistence = true; // should primes be displayed through-out audio?
+        const study_enable_persistence_centred = true // should items be centred on top of the prime (e.g., to avoid predictive eye movements?)
+        const study_enable_explicit = true; // should explicit instructions be included?
+        const study_enable_explicit_topics = true; // should explicit instructions _include_ the topics speakers prefer?
+        const study_enable_explicit_labels = false; // should explicit labels be printed for the speakers?
+        const study_grid_maxheight = 200; // max height of single image in face grid (in px)
+        const study_min_iti = 400; // minimum ITI (in ms)
+        const study_max_iti = 600; // maximum ITI (in ms)
+        const study_sample_iti = () => { return Math.floor(Math.random() * (study_max_iti - study_min_iti)) + study_min_iti; } // how do we sample trial-wise ITI?
+
+        // participant descriptors
+        const prolific_pid = ('PROLIFIC_PID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().PROLIFIC_PID : undefined);
+        const prolific_eid = ('STUDY_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().STUDY_ID : undefined);
+        const prolific_sid = ('SESSION_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().SESSION_ID : undefined);
+        const prolific_cid = 'C4Y3BQPX';
+        const prolific_rid_0 = 'CONRKYKB'; // consent
+        const prolific_rid_1 = 'C1B6E0FY'; // headphones
+        const prolific_rid_2 = 'CVTCMYD1'; // attention
+        const prolific_url = 'https://app.prolific.co/submissions/complete?cc={0}';
+        const pid = ('pid' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().pid : prolific_pid);
+
+        /**
+         * Shuffles array in place (Fisher-Yates).
+         * @param {Array} a items An array containing the items.
+         */
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length - 1; i > 0; i--) {
+                j = Math.floor(Math.random() * (i + 1));
+                x = a[i];
+                a[i] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+
+        function run_experiment(data) {
+            // ensure pid exists, unless specified otherwise
+            if (__flag_requireid && (typeof(pid) === 'undefined' || pid.length < 1)) {
+                alert('Es wurde keine Probanden-ID gefunden. Bitte wenden Sie sich an die Experimentleitung.')
+                return;
+            }
+
+            // setup timeline & preloads
+            let timeline = [];
+            let preload_audio = [];
+            let preload_images = [];
+
+            // setup pavlovia session
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "init"
+                });
+            }
+
+            // setup contexts, identities & features
+            let contexts = ['essen', 'fashion', 'unterhaltung',
+                            'technik', 'politik', 'outdoor'];
+            let identities = ['face3', 'face6', 'face7', 
+                              'face10', 'face11', 'face12'];
+            let features = ['glasses3', 'glasses2', 'piercing1',
+                            'piercing2', 'scar1', 'scar2'];
+            let stories = {'essen': 'Ich bin der Chef eines Restaurants. Essen ist meine Leidenschaft und in der Küche fühle ich mich wohl.',
+                           'fashion': 'Ich interessiere mich für Klamotten und Style. Heute leite ich ein erfolgreiches Mode-Label.',
+                           'unterhaltung': 'Ich bin als Kritiker tätig. Dabei beschäftige ich mich mit Kunst aller Art, hauptsächlich mit Theater, Film und Musik.', 
+                           'technik': 'Ich finde Computer und Technik spannend. Ich leite eine Firma für Informations- technologie und Elektronik.',
+                           'politik': 'Ich bin sehr interessiert an Politik und verschiedenen Regierungsformen. Ich arbeite im Parlament.',
+                           'outdoor': 'Ich reise gern und bin am liebsten in der Natur. Ich interessiere mich für Pflanzen, Tiere und Sport.'}
+            
+            // setup speakers
+            let speakers = [];
+
+            // generate speakers from identities & features
+            let fstr = './resources/images/{0}_{1}.png';
+
+            for (let i = 0; i < identities.length; i++) {
+                let findx = Math.floor(Math.random() * features.length);
+                let spkr = fstr.format(identities[i], features[findx]);
+                features.splice(findx, 1);
+                speakers.push(spkr);
+            }
+
+            // setup randomised speaker:context mapping
+            let cmapping = {};
+            let indcs = [...Array(contexts.length).keys()];
+            shuffle(indcs);
+
+            for (let i = 0; i < indcs.length; i++) {
+                cmapping[contexts[i]] = speakers[indcs[i]];
+            }
+
+            // make speakers preloadable
+            preload_images = preload_images.concat(speakers);
+            
+            if (!__flag_fastmode) {
+                // setup consent failure callback
+                let c_callback = (e) => {
+                    let trialContainer = $(e).find('#trial-container');
+                    let timer = $('<div style="width: 75%;" align="justify" id="timer">Weiterleitung zu Prolific in...<span id="countdown">' + (study_buffer_before_rejection / 1000).toString() + '</span></p>');
+                    let start_time = performance.now();
+                    let interval = setInterval(() => {
+                        let remaining_time = study_buffer_before_rejection - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            clearInterval(interval);
+                            window.location = prolific_url.format(prolific_rid_0);
+                        }
+                    });
+                    timer.appendTo(trialContainer);
+                };
+
+                // setup brief & informed consent
+                timeline.push({
+                    type: "informed_consent_uke",
+                    study_language: study_language,
+                    study_title: study_title,
+                    study_subtitle: study_subtitle,
+                    study_centre: "die Arbeitsgruppe f&#252;r Kommunikation des Instituts f&#252;r systemische Neurowissenschaften am Universit&#228;tsklinikum Hamburg-Eppendorf (UKE)",
+                    study_purpose: ", wie das Gehirn Erwartungen erwirbt und verwendet",
+                    study_description: "Zun&#228;chst finden einige kurze Vortests statt, dann wird das Hauptexperiment erkl&#228;rt. " + 
+                                    "Dieses dauert in etwa " + study_duration.toString() + " Minuten. " + 
+                                    "Dabei lernen Sie Personen kennen, die schwer verst&#228;ndliche Worte sagen und Sie sollen entscheiden, was die Person gesagt haben k&#246;nnte. " + 
+                                    "Nach dem Hauptexperiment folgen einige Fragen zu den kennengelernten Personen.",
+                    study_inclusion_criteria: ulist('Gesunde Proband:innen, die voll gesch&#228;fts- und aufkl&#228;rungsf&#228;hig sind',
+                                                    'Alter: 18-40 Jahre',
+                                                    'Muttersprache: Deutsch',
+                                                    'Normale oder korrigiert-normale Sehkraft (bspw. durch Brille oder Kontaktlinsen)',
+                                                    'Einwilligung in die Untersuchung'),
+                    study_exclusion_criteria: ulist('Einschr&#228;nkungen des Geh&#246;rs (bspw. Taubheit, schwerer Tinnitus, etc.)',
+                                                    'ADS/ADHS',
+                                                    'Dyslexie',
+                                                    'Farbblindheit'),
+                    study_contact_person: 'Dr. Helen Blank',
+                    study_duration_in_minutes: study_duration,
+                    study_hourly_rate: study_hourly_rate,
+                    study_privacy_contact_person: 'Dr. Helen Blank',
+                    study_privacy_contact_centre: 'Institut f&#252;r systemische Neurowissenschaften am Universit&#228;tsklinikum Hamburg-Eppendorf, UKE',
+                    study_privacy_contact_address: 'Martinistra&#223;e 52 / W34, 20246 Hamburg',
+                    study_privacy_contact_phone: '(040) 7410-57160',
+                    study_privacy_contact_email: 'hblank@uke.de',
+                    f_callback: c_callback
+                });
+
+                if (__flag_hc) {
+                    // setup head phone check
+                    timeline.push({
+                        type: "headphone_check",
+                        study_language: study_language,
+                        study_title: study_title,
+                        study_subtitle: study_subtitle,
+                        no: 6,
+                        threshold: 5/6,
+                        file_calibration: './resources/audio/noise_calib_stim.wav',
+                        stimuli: {
+                            './resources/audio/antiphase_HC_IOS.wav': 3,
+                            './resources/audio/antiphase_HC_ISO.wav': 2,
+                            './resources/audio/antiphase_HC_OIS.wav': 3,
+                            './resources/audio/antiphase_HC_OSI.wav': 2,
+                            './resources/audio/antiphase_HC_SIO.wav': 1,
+                            './resources/audio/antiphase_HC_SOI.wav': 1
+                        },
+                        repeatable: true
+                    });
+                }
+
+                // make head phone check data preloadable
+                preload_audio = preload_audio.concat(['./resources/audio/antiphase_HC_IOS.wav',
+                                                      './resources/audio/antiphase_HC_ISO.wav',
+                                                      './resources/audio/antiphase_HC_OIS.wav',
+                                                      './resources/audio/antiphase_HC_OSI.wav',
+                                                      './resources/audio/antiphase_HC_SIO.wav',
+                                                      './resources/audio/antiphase_HC_SOI.wav',
+                                                      './resources/audio/noise_calib_stim.wav']);
+                
+                // setup full screen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscren_mode: true,
+                    message: '<p>Das Experiment wird nun in den Vollbild-Modus geschaltet.</p>',
+                    button_label: "Weiter"
+                });
+
+                // setup concrete instructions
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        '<div align="justify">' + paragraphs(
+                            bold('Einweisung ins Experiment'),
+                            'Stellen Sie sich vor, Sie gehen auf eine Feier, auf der Sie {0} Personen kennenlernen. '.format(speakers.length.toString()) + 
+                                'In jedem Durchgang sehen Sie eine dieser Personen. ' + 
+                                'Die Person sagt ein Wort, das aufgrund der Umgebung kaum verst&#228;ndlich ist. ' + 
+                                'Ihre Aufgabe ist es nun, aus zwei gezeigten Optionen das Wort auszuw&#228;hlen, das die Person am ehesten gesagt hat.' + 
+                                (!study_enable_explicit ? '' : ' Dabei wird jede Person genau ein Thema haben, &#252;ber welches sie spricht.'),
+                            'Am Ende des Experiments werden Ihnen einige Fragen zu diesen Personen gestellt.', 
+                            'Machen Sie w&#228;hrend des laufenden Experiments bitte keine zus&#228;tzlichen Pausen. ' +
+                                'Sie werden in regelm&#228;&#223;igen Abst&#228;nden die M&#246;glichkeit einer Pause haben.',
+                            '<b>Achtung:</b> Das Experiment wird in etwa ' + study_duration.toString() + ' Minuten dauern und kann nicht zwischengespeichert werden.',
+                            'Bitte f&#252;hren Sie das Experiment ungest&#246;rt und in einer ruhigen Umgebung ohne Unterbrechung durch.',
+                            'Dr&#252;cken Sie `{0}`, um zur n&#228;chsten Seite zu gelangen.'.format(study_key_right_desc)
+                        ) + '</div>',
+                        '<div align="justify">' + 
+                            ((!study_enable_explicit) ? 
+                                paragraphs(
+                                    bold('Einweisung ins Experiment'),
+                                    'Hier sehen Sie alle {0} Personen. Machen Sie sich bitte mit ihnen vertraut, bevor Sie fortfahren.</div>'.format(speakers.length.toString()) + 
+                                    '<div style="max-width: 1400px; margin: 0 auto !important; float: none !important;">' + 
+                                        Object.entries(cmapping).reduce((str, [p, val]) => {
+                                            return '{0}<img src="{1}" style="max-height: {2}px; height: auto;" />\n'.format(str, val, study_grid_maxheight.toString())
+                                        }, '') +
+                                    '</div>',
+                                    '<div align="justify">Dr&#252;cken Sie `{0}`, um zur n&#228;chsten Seite zu gelangen.'.format(study_key_right_desc),
+                                    'Dr&#252;cken Sie `{0}`, um zur vorigen Seite zu gelangen, falls Sie diese noch einmal lesen m&#246;chten.'.format(study_key_left_desc)
+                                )
+                                :
+                                paragraphs(
+                                    bold('Einweisung ins Experiment'),
+                                    'Hier sehen Sie alle {0} Personen. <b>Achtung:</b> Jede hat jeweils genau ein Thema, &#252;ber das sie gerne spricht.'.format(speakers.length.toString()) + 
+                                    (study_enable_explicit_topics ? ' Im Folgenden stellen sich alle Personen mit ihrem jeweiligen Lieblingsthema kurz vor.' : '') + 
+                                    '</div>',
+                                    '<div style="max-width: 1400px; margin: 0 auto !important; float: none !important; display: flex;">' + 
+                                        Object.entries(cmapping).reduce((str, [p, val]) => {
+                                            return '{0}'.format(str) + 
+                                                        '<table style="width: 466px; max-width: 466px; flex: 33%;">' + 
+                                                            '<tr>' + 
+                                                                '<td style="width: 466px;" align="center">' + 
+                                                                    (study_enable_explicit_labels ? '&nbsp;&nbsp;' + (p.charAt(0).toUpperCase() + p.slice(1)) + '&nbsp;&nbsp;' : '') +
+                                                                    '<img src="{0}" style="max-height: {1}px; height: auto;" />'.format(val, study_grid_maxheight.toString()) + 
+                                                                '</td>' + 
+                                                            '</tr>' + 
+                                                        '</table>\n'
+                                        }, '') +
+                                    '</div>',
+                                    '<div style="max-width: 1400px; margin: 0 auto !important; float: none !important; display: flex;">' + 
+                                        Object.entries(cmapping).reduce((str, [p, val]) => {
+                                            return '{0}'.format(str) + 
+                                                        '<table style="width: 466px; max-width: 466px; flex: 33%;">' + 
+                                                            '<tr>' + 
+                                                                '<td style="width: 430px; padding-left: 18px; padding-right: 18px; vertical-align: top;" align="left">{0}</td>'.format((study_enable_explicit_topics ? '"<i>' + stories[p] + '</i>"' : '')) + 
+                                                            '</tr>' + 
+                                                        '</table>\n'
+                                        }, '') +
+                                    '</div>',
+                                    '<div align="justify">Machen Sie sich bitte mit den Sprechern vertraut, bevor Sie fortfahren.',
+                                    'Dr&#252;cken Sie `{0}`, um zur n&#228;chsten Seite zu gelangen.'.format(study_key_right_desc),
+                                    'Dr&#252;cken Sie `{0}`, um zur vorigen Seite zu gelangen, falls Sie diese noch einmal lesen m&#246;chten.'.format(study_key_left_desc)
+                                ))
+                        + '</div>',
+                        '<div align="justify">' + paragraphs(
+                            bold('Einweisung ins Experiment'),
+                            'Dr&#252;cken Sie `{0}` f&#252;r die linke oder `{1}` f&#252;r die rechte Option. '.format(study_key_left_long, study_key_right_long) + 
+                                'Wenn Ihre Antwortm&#246;glichkeiten beispielsweise `Bummel | Hummel` sind und Sie es f&#252;r wahrscheinlicher halten, dass die Person `Hummel` gesagt hat, dr&#252;cken Sie `{0}`.'.format(study_key_right_desc),
+                            'F&#252;r jede Antwort haben Sie zwei Sekunden Zeit. ' + ((!study_enable_feedback) ? '' : 'Nach Ihrer Entscheidung erhalten Sie Feedback. Ein Fehler wird rot und eine korrekte Entscheidung gr&#252;n angezeigt. ' + (!study_enable_feedback_manipulation ? '' : 'Achtung: Dieses Feedback wird nicht nach allen Entscheidungen gegeben. ')) + 
+                                'Die Entscheidung wird automatisch &#252;bersprungen wird, sobald die Zeit abgelaufen ist.',
+                            'Sind Sie bereit?',
+                            'Dr&#252;cken Sie `{0}`, um den &#220;bungsblock zu starten, oder `{1}`, um zur letzten Erkl&#228;rung zur&#252;ckzukehren.'.format(study_key_right_desc, study_key_left_desc)
+                        ) + '</div>',
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                });
+            }
+            
+            // add countdown for practice trials
+            timeline.push({
+                type: 'html-button-response',
+                stimulus: '<p id="timer">Der &#220;bungsblock beginnt in... <span id="countdown">' + (study_countdown / 1000).toString() + '</span></p>',
+                choices: ['Weiter'],
+                on_load: function() {
+                    let start_time = performance.now();
+                    $('button').hide();
+                    
+                    let interval = setInterval(() => {
+                        let remaining_time = study_countdown - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+                        
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            $('.jspsych-btn').click();
+                            clearInterval(interval);
+                        }
+                    }, 100);
+                }
+            });
+            
+            // setup practice trials
+            let practice_trials = [{stimulus: './audio_morphed/Mehl-mal_1-1_12ch_0.50_r1_cs.wav', target: 'Mehl', d1: 'mal', context: 'essen', is_control: false},
+                                   {stimulus: './audio_morphed/Goethe-Göre_2-1_12ch_0.50_r1_cs.wav', target: 'Goethe', d1: 'Göre', context: 'unterhaltung', is_control: false},
+                                   {stimulus: './audio_morphed/Bund-Mund_2-2_12ch_0.50_r1_cs.wav', target: 'Bund', d1: 'Mund', context: 'politik', is_control: false},
+                                   {stimulus: './audio_morphed/Starkstrom-Symptom_2-2_12ch_0.50_r1_cs.wav', target: 'Starkstrom', d1: 'Symptom', context: 'technik', is_control: false},
+                                   {stimulus: './audio_morphed/modern-ungern_1-1_12ch_0.50_r1_cs.wav', target: 'modern', d1: 'ungern', context: 'fashion', is_control: false},
+                                   {stimulus: './audio_morphed/walken-borgen_2-2_12ch_0.50_r1_cs.wav', target: 'walken', d1: 'borgen', context: 'outdoor', is_control: false}];
+            
+            // randomise practice block
+            let practice = [...Array(practice_trials.length).keys()];
+            practice.sort(() => Math.random() - 0.5);
+
+            // add practice trials
+            for (let i = 0; i < practice_trials.length; i++) {
+                // place target
+                let target_position = Math.floor(Math.random() * 2);
+
+                // add trial to timeline
+                timeline.push({
+                    type: "2afc_audio_visual",
+                    no: -1,
+                    block: -1,
+                    prime: cmapping[practice_trials[practice[i]].context],
+                    stimulus: practice_trials[practice[i]].stimulus,
+                    is_control: Boolean(practice_trials[practice[i]].is_control),
+                    option_left: (target_position == 0) ? practice_trials[practice[i]].target : practice_trials[practice[i]].d1,
+                    option_right: (target_position == 0) ? practice_trials[practice[i]].d1 : practice_trials[practice[i]].target,
+                    target_position: (target_position == 0) ? 'left' : 'right',
+                    enable_prime: study_enable_primes,
+                    enable_persistence: study_enable_persistence,
+                    enable_persistence_centred: study_enable_persistence_centred,
+                    enable_feedback: (study_enable_feedback ? (study_enable_feedback_manipulation ? study_enable_feedback_trial(practice_trials[practice[i]]) : true) : false),
+                    key_left: 'LeftArrow',
+                    key_right: 'RightArrow',
+                    post_trial_gap: study_sample_iti
+                });
+
+                // make preloadable
+                preload_audio.push(practice_trials[practice[i]].stimulus);
+            }
+
+            // add intermezzo before main experiment
+            timeline.push({
+                type: "instructions",
+                pages: [
+                    '<div align="justify">' + paragraphs(
+                        bold('Start des Hauptexperiments'),
+                        'Sie haben den &#220;bungsblock abgeschlossen. Vielleicht sind Ihnen manche Entscheidungen dabei nicht leicht gefallen. ' + 
+                            (!study_enable_explicit ? 
+                                'Denken Sie im Folgenden daran, dass die Entscheidungen so schnell und akkurat wie m&#246;glich getroffen werden sollen.' : 
+                                'Zur Erinnerung: Jede Person hat genau ein Thema, &#252;ber das sie spricht. ' +
+                                'Nutzen Sie dieses Wissen, um das Wort, das die Person tatsächlich gesagt hat, zu identifizieren. ' + 
+                                'Bitte antworten Sie so schnell und akkurat wie m&#246;glich.'),
+                        'Sind Sie bereit?',
+                        'Dr&#252;cken Sie `{0}`, um mit dem Hauptexperiment zu beginnen.'.format(study_key_right_desc)
+                    ) + '</div>'
+                ],
+                allow_keys: true,
+                key_backward: study_key_left,
+                key_forward: study_key_right,
+                show_clickable_nav: true,
+                button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+            });
+
+            // add countdown for main experiment
+            timeline.push({
+                type: 'html-button-response',
+                stimulus: '<p id="timer">Das Experiment beginnt in... <span id="countdown">' + (study_countdown / 1000).toString() + '</span></p>',
+                choices: ['Weiter'],
+                on_load: function() {
+                    let start_time = performance.now();
+                    $('button').hide();
+                    
+                    let interval = setInterval(() => {
+                        let remaining_time = study_countdown - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+                        
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            $('.jspsych-btn').click();
+                            clearInterval(interval);
+                        }
+                    }, 100);
+                }
+            });
+
+            // RTP measurement function
+            let rtp_measurement = (b = -1) => {
+                if (b < 0) {
+                    // overall
+                    if (jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0}).count() < 1) {
+                        return 0;
+                    }
+
+                    return Math.round(100 * 
+                            (jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0 && t.choice_is_target; }).count() / 
+                             jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0}).count())
+                    );
+                }
+
+                // block-wise
+                if (jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0 && t.block == b}).count() < 1) {
+                    return 0;
+                }
+
+                return Math.round(100 * 
+                        (jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0 && t.block == b && t.choice_is_target; }).count() / 
+                         jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0 && t.block == b}).count())
+                );
+            };
+
+            // RTC rejection function
+            let rtc_rejection = (e) => {
+                let trialContainer = $(e).find('#trial-container');
+                let timer = $('<p id="timer">Weiterleitung zu Prolific in...<span id="countdown">' + (study_buffer_before_rejection / 1000).toString() + '</span></p>');
+                let start_time = performance.now();
+                let interval = setInterval(() => {
+                    let remaining_time = study_buffer_before_rejection - (performance.now() - start_time);
+                    $('#countdown').html(Math.round(remaining_time / 1000).toString());
+
+                    if (remaining_time <= 1e3 && remaining_time > 0) {
+                        $('#timer').hide();
+                    } else if (remaining_time <= 0) {
+                        clearInterval(interval);
+                        window.location = prolific_url.format(prolific_rid_2);
+                    }
+                });
+                timer.appendTo(trialContainer);
+            };
+            
+            // track blocks
+            let current_block = 0;
+
+            // setup trial numbers
+            let trial_no = [...Array(data.length).keys()];
+            console.log(data.length);
+            let trials = [];
+            let last_n = 0;
+            let last_t = null;
+
+            // pseudorandomise trial numbers
+            for (let i = 0; i < data.length; i++) {
+                let valid = false;
+                let max_n = 10;
+                let current_n = 0;
+
+                while (!valid) {
+                    // make sure that, if no solution can be found in the
+                    // current trajectory, we do a cheeky resampling from
+                    // zero instead
+                    current_n += 1
+                    console.log(trials.length.toString() + ": " + current_n.toString())
+                    if (current_n > max_n) {
+                        trial_no = [...Array(data.length).keys()];
+                        trials = [];
+                        last_n = 0;
+                        last_t = null;
+                        i = -1;
+                        break;
+                    }
+
+                    // draw and set valid
+                    let indx = Math.floor(Math.random() * trial_no.length);
+                    draw = trial_no[indx];
+                    valid = true;
+
+                    // control same type repetitions (min)
+                    if (typeof(last_t) !== 'undefined' && last_t != null && data[draw].context != last_t && last_n < study_min_type_repetitions) {
+                        valid = false;
+                        continue;
+                    }
+
+                    // control same type repetitions (max)
+                    if (data[draw].context == last_t && last_n >= study_max_type_repetitions) {
+                        valid = false;
+                        continue;
+                    }
+
+                    // control same token repetitions within N-tokens
+                    for (let j = trials.length - study_buffer_token_repetitions; j < trials.length; j++) {
+                        if (j < 0) {
+                            continue;
+                        }
+
+                        if (data[trials[j]].target == data[draw].target || data[trials[j]].popular == data[draw].popular ||
+                            data[trials[j]].target == data[draw].popular || data[trials[j]].popular == data[draw].target) {
+                            valid = false;
+                            break;
+                        }
+                    }
+
+                    // resample if invalid
+                    if (!valid) {
+                        continue;
+                    }
+
+                    // update last type
+                    if (data[draw].context != last_t) {
+                        last_t = data[draw].context;
+                        last_n = 0;
+                    }
+                        
+                    // update statistics, push and consume
+                    last_n += 1;
+                    trials.push(draw);
+                    trial_no.splice(indx, 1);
+                }
+            }
+
+            // create individual trials
+            for (let i = 0; i < trials.length; i++) {
+                // insert break if necessary
+                if ((i % study_block_length) == 0 && i > 0) {
+                    timeline.push({
+                        type: 'call-function',
+                        async: true,
+                        func: (d) => {
+                            let cbl = Math.floor(jsPsych.data.get().filterCustom((t) => { return t.trial_type == "2afc_audio_visual" && t.no >= 0}).count() / study_block_length) - 1;
+
+                            // show trial
+                            jsPsych.getDisplayElement().innerHTML = '<div align="justify">' + paragraphs(
+                                    bold("Pause"),
+                                    'Sie haben nun <b>{0} von {1}</b> Durchg&#228;ngen abgeschlossen. '.format(i.toString(), trials.length.toString()),
+                                    'Im letzten Block haben Sie in <b>{0}%</b> der F&#228;lle das von der Person ge&#228;usserte Wort <b>korrekt</b> erkannt.'.format(rtp_measurement(cbl).toString()),
+                                    (!study_enable_explicit ? '' : '<b>Achtung:</b> Jede Person hat genau ein Thema, &#252;ber welches sie spricht. Nutzen Sie dieses Wissen, um das Wort, das die Person tatsächlich gesagt hat, zu identifizieren.'),
+                                    'Wenn Sie bereit sind, dann dr&#252;cken Sie `{0}`, um mit dem Experiment fortzufahren.'.format(study_key_right_desc)
+                            ) + '</div>';
+
+                            // setup key handler
+                            let keyHandler = function(event){
+                                if ([jsPsych.pluginAPI.convertKeyCharacterToKeyCode('RightArrow')].includes(event.key)) {
+                                    jsPsych.pluginAPI.cancelKeyboardResponse(keyListener);
+
+                                    d(performance.now() - start_time);
+                                }
+                            }
+
+                            // setup key listener
+                            let keyListener = jsPsych.pluginAPI.getKeyboardResponse({
+                                callback_function: keyHandler,
+                                valid_responses: jsPsych.ALL_KEYS,
+                                rt_method: 'performance',
+                                persist: true
+                            });
+
+                            // setup measurement
+                            const start_time = performance.now();
+                        }
+                    });
+                    
+                    current_block += 1;
+                }
+
+                // place target
+                let target_position = Math.floor(Math.random() * 2);
+                
+                // add trial to timeline
+                timeline.push({
+                    type: "2afc_audio_visual",
+                    no: i,
+                    block: current_block,
+                    prime: cmapping[data[trials[i]].context],
+                    stimulus: data[trials[i]]["file"],
+                    is_control: Boolean(data[trials[i]].is_control),
+                    option_left: (target_position == 0) ? data[trials[i]].target : data[trials[i]].popular,
+                    option_right: (target_position == 0) ? data[trials[i]].popular : data[trials[i]].target,
+                    target_position: (target_position == 0) ? 'left' : 'right',
+                    enable_prime: study_enable_primes,
+                    enable_persistence: study_enable_persistence,
+                    enable_persistence_centred: study_enable_persistence_centred,
+                    enable_feedback: (study_enable_feedback ? (study_enable_feedback_manipulation ? study_enable_feedback_trial(data[trials[i]]) : true) : false),
+                    key_left: 'LeftArrow',
+                    key_right: 'RightArrow',
+                    rtc_callback: rtc_rejection,
+                    post_trial_gap: study_sample_iti
+                });
+                
+                // make preloadable
+                preload_audio.push(data[trials[i]]["file"]);
+            }
+            
+            /*
+            // if not in explicit mode, setup survey questions
+            // if (!study_enable_explicit) {
+            minor correction: I think I want to have
+            the same questionnaire for all experiments
+            just to make sure we can compare participants
+            from different runs...
+            */
+            if (true) {
+                if (!__flag_fastmode) {
+                    // instructions
+                    timeline.push({
+                        type: "instructions",
+                        pages: [
+                            '<div align="justify">' + paragraphs(
+                                bold('Abschluss des Hauptexperiments'),
+                                'Sie haben das Hauptexperiment erfolgreich abgeschlossen. ' + 
+                                    'Es folgen nun noch zwei kurze Aufgaben. ' + 
+                                    'Zun&#228;chst beantworten Sie einige Fragen zum Verlauf des Experiments bitte per Mausklick.',
+                                'Das Experiment wird f&#252;r diese Aufgabe den Vollbildmodus verlassen.',
+                                'Dr&#252;cken Sie auf `{0}`, um mit dem Fragebogen zu beginnen.'.format(study_key_right_desc)
+                            ) + '</div>'
+                        ],
+                        allow_keys: true,
+                        key_backward: study_key_left,
+                        key_forward: study_key_right,
+                        show_clickable_nav: true,
+                        button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                        button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                    });
+                }
+
+                // setup exit from fullscreen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscreen_mode: false
+                });
+
+                // add survey questions
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Hatten Sie w&#228;hrend des laufenden Experiments den Eindruck, dass bestimmte Personen besonders gerne &#252;ber bestimmte Themengebiete gesprochen haben?',
+                            name: 'q_awareness',
+                            options: ['Ja', 'Eher ja', 'Eher nein', 'Nein'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_awareness": d.response.q_awareness});
+                    }
+                });
+
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Falls ja, wieviele Themengebieten glauben Sie identifiziert zu haben? (Falls nein, bitte 0 angeben.)',
+                            name: 'q_number',
+                            options: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_number": d.response.q_number});
+                    }
+                });
+
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Hatten Sie den Eindruck, dass Sie sich manchmal gegen das geh&#246;rte Wort entscheiden mussten, um die richtige Antwort zu geben?',
+                            name: 'q_conflict',
+                            options: ['Ja', 'Nein'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_conflict": d.response.q_conflict});
+                    }
+                });
+
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Falls ja, haben Sie in diesen F&#228;llen eher angegeben, was Sie geh&#246;rt zu haben glaubten oder was Sie f&#252;r die richtige Antwort hielten? (Falls nein, bitte `Eher die richtige Antwort` angeben.)',
+                            name: 'q_decision',
+                            options: ['Eher das Geh&#246;rte', 'Eher die richtige Antwort'],
+                            required: true,
+                            horizontal: true
+                        },
+                        {
+                            prompt: 'Falls ja, haben Sie diese Strategie bewusst w&#228;hrend des Experiments gewechselt? (Falls nein, bitte Nein angeben.)',
+                            name: 'q_strategy_shift',
+                            options: ['Nein', 'Zuerst `Eher das Geh&#246;rte`, dann `Eher die richtige Antwort`.', 'Zuerst `Eher die richtige Antwort`, dann `Eher das Geh&#246;rte`.'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_decision": d.response.q_decision, "q_strategy_shift": d.response.q_strategy_shift});
+                    }
+                });
+
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Hatten Sie im Laufe des Experiments den Eindruck, manche Worte bereits zuvor schon im Experiment geh&#246;rt zu haben?',
+                            name: 'q_repetitions',
+                            options: ['Ja', 'Eher ja', 'Eher nein', 'Nein'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_repetitions": d.response.q_repetitions});
+                    }
+                });
+
+                timeline.push({
+                    type: 'survey-multi-choice',
+                    questions: [
+                        {
+                            prompt: 'Falls ja, hatten Sie den Eindruck, von unterschiedlichen Personen das rein akustisch gleiche Wort geh&#246;rt zu haben? (Falls nein, bitte Nein angeben.)',
+                            name: 'q_repetitions_acoustic',
+                            options: ['Ja', 'Eher ja', 'Eher nein', 'Nein'],
+                            required: true,
+                            horizontal: true
+                        }
+                    ],
+                    on_finish: (d) => {
+                        Object.assign(d, {"q_repetitions_acoustic": d.response.q_repetitions_acoustic});
+                    }
+                });
+            }
+            
+            // setup word categorisation task
+            let cat_stimuli = [{'word': 'Fleisch', 'context': 'essen'}, {'word': 'Rotkraut', 'context': 'essen'}, {'word': 'Kartoffel', 'context': 'essen'}, {'word': 'Mahlzeit', 'context': 'essen'}, {'word': 'Mehl', 'context': 'essen'},
+                               {'word': 'Backpulver', 'context': 'essen'}, {'word': 'Croissant', 'context': 'essen'}, {'word': 'Marmelade', 'context': 'essen'}, {'word': 'Getreide', 'context': 'essen'}, {'word': 'Sauerteig', 'context': 'essen'},
+                               {'word': 'Catwalk', 'context': 'fashion'}, {'word': 'Jeans', 'context': 'fashion'}, {'word': 'Sakko', 'context': 'fashion'}, {'word': 'Mantel', 'context': 'fashion'}, {'word': 'Sandalen', 'context': 'fashion'}, 
+                               {'word': 'Pullover', 'context': 'fashion'}, {'word': 'Ohrring', 'context': 'fashion'}, {'word': 'Halskette', 'context': 'fashion'}, {'word': 'Abendkleid', 'context': 'fashion'}, {'word': 'Klamotten', 'context': 'fashion'}, 
+                               {'word': 'Politik', 'context': 'politik'}, {'word': 'Präsident', 'context': 'politik'}, {'word': 'Bundestag', 'context': 'politik'}, {'word': 'Legislative', 'context': 'politik'}, {'word': 'Kommission', 'context': 'politik'}, 
+                               {'word': 'Abgeordnete', 'context': 'politik'}, {'word': 'Gesetzentwurf', 'context': 'politik'}, {'word': 'Abstimmung', 'context': 'politik'}, {'word': 'Öffentlichkeit', 'context': 'politik'}, {'word': 'Partei', 'context': 'politik'}, 
+                               {'word': 'Technik', 'context': 'technik'}, {'word': 'Konsole', 'context': 'technik'}, {'word': 'Elektronik', 'context': 'technik'}, {'word': 'Computer', 'context': 'technik'}, {'word': 'Kabel', 'context': 'technik'}, 
+                               {'word': 'Adapter', 'context': 'technik'}, {'word': 'Batterie', 'context': 'technik'}, {'word': 'Antenne', 'context': 'technik'}, {'word': 'Software', 'context': 'technik'}, {'word': 'Entwickler', 'context': 'technik'}, 
+                               {'word': 'Unterhaltung', 'context': 'unterhaltung'}, {'word': 'Theater', 'context': 'unterhaltung'}, {'word': 'Kino', 'context': 'unterhaltung'}, {'word': 'Schauspieler', 'context': 'unterhaltung'}, {'word': 'Blockbuster', 'context': 'unterhaltung'}, 
+                               {'word': 'Kunst', 'context': 'unterhaltung'}, {'word': 'Bühnenbild', 'context': 'unterhaltung'}, {'word': 'Regisseur', 'context': 'unterhaltung'}, {'word': 'Kabarett', 'context': 'unterhaltung'}, {'word': 'Satire', 'context': 'unterhaltung'}, 
+                               {'word': 'Outdoor', 'context': 'outdoor'}, {'word': 'Unwetter', 'context': 'outdoor'}, {'word': 'Camping', 'context': 'outdoor'}, {'word': 'Bergsteiger', 'context': 'outdoor'}, {'word': 'Zeltplatz', 'context': 'outdoor'}, 
+                               {'word': 'Wald', 'context': 'outdoor'}, {'word': 'Gipfel', 'context': 'outdoor'}, {'word': 'Wanderer', 'context': 'outdoor'}, {'word': 'Wildnis', 'context': 'outdoor'}, {'word': 'Insekten', 'context': 'outdoor'}]
+
+            if (!__flag_fastmode) {
+                // setup instructions for word categorisation circle task
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        '<div align="justify">' + paragraphs(
+                            bold('Abschluss des Hauptexperiments'),
+                            'Nun folgt die letzte Aufgabe, in der Sie ein Wort inmitten der 6 Personen sehen. ' +
+                                'Sie sollen entscheiden, welche Person dieses Wort wohl am ehesten sagen w&#252;rde. ' +
+                                'F&#252;r Ihre Antwort dr&#252;cken Sie bitte auf das Bild der jeweiligen Person.',
+                            'Insgesamt gibt es {0} Worte, die Sie zuordnen m&#252;ssen.'.format(Object.keys(cat_stimuli).length.toString()),
+                            'Dr&#252;cken Sie auf `{0}`, um mit der Zuordnung zu beginnen.'.format(study_key_right_desc)
+                        ) + '</div>'
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                });
+
+                // setup exit from fullscreen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscreen_mode: false
+                });
+            }
+
+            // randomise categorisation trials
+            let post = [...Array(cat_stimuli.length).keys()];
+            shuffle(post);
+
+            // add word categorisation circle trials
+            for (let i = 0; i < post.length; i++) {
+                let trial = cat_stimuli[post[i]];
+
+                timeline.push({
+                    type: "word_categorisation_circle",
+                    images: Object.values(cmapping),
+                    stimulus: trial.word,
+                    expectation: cmapping[trial.context],
+                    enable_fixation: true
+                });
+            }
+
+            // setup pavlovia exit
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "finish",
+                    participantId: pid
+                });
+            }
+
+            if (!__flag_fastmode) {
+                // setup debrief
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        '<div align="justify">' + paragraphs(
+                            bold('Abschluss des Experiments'),
+                            'Wir bedanken uns herzlich f&#252;r Ihre Teilnahme und Ihren Beitrag zur Forschung.',
+                            bold('Bitte schlie&#223;en Sie das Fenster noch nicht') + ', sondern dr&#252;cken Sie `{0}`, um das Experiment abzuschliessen und zu Prolific zu gelangen, um Ihre Verg&#252;tung zu erhalten. '.format(study_key_right_desc)
+                        ) + '</div>'
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Zur&#252;ck'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Weiter'.format(study_key_right_desc)
+                });
+            }
+
+            // setup wrap up
+            let on_finish = !__flag_local && (typeof(prolific_pid) !== 'undefined') &&
+                                             (typeof(prolific_cid) !== 'undefined') ? () => {
+                // redirect to prolific
+                setTimeout(() => { 
+                    window.location = prolific_url.format(prolific_cid);
+                }, study_buffer_before_redirect);
+            } : () => {
+                // print data
+                jsPsych.data.displayData('csv');
+            };
+
+            // setup identifiers
+            jsPsych.data.addProperties({pid: pid, 
+                                        prolific_pid: prolific_pid,
+                                        prolific_eid: prolific_eid,
+                                        prolific_sid: prolific_sid});
+
+            // launch experiment
+            jsPsych.init({timeline: timeline,
+                          preload_audio: preload_audio,
+                          preload_images: preload_images,
+                          on_finish: on_finish});
+        }
+        
+        $().ready(function(){
+            fetch(study_stimulus_file)
+            .then((r) => r.json())
+            .then((json) => run_experiment(json));
+        });
+    </script>
+</html>
