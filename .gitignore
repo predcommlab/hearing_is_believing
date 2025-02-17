@@ -5,3 +5,11 @@
 ./experiments/online/data/*
 ./experiments/validation/data/*
 ./experiments/validation/resources/*.wav
+
+./analysis/validation/data/*
+./analysis/online/data/*
+./analysis/eeg/data/*
+
+*.wav
+*.npy
+*.gz.pkl
