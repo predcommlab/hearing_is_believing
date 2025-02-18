@@ -211,6 +211,16 @@ python subject_rtfe.py -generalised -unspecific
 
 These estimates will be used in all further scripts.
 
+#### ❕ Optional: Preprocessing EEG data
+If you would like to re-run the preprocessing pipeline, you can run the following code. Note, however, that this is *not* a deterministic process (and some manual decisions must be taken). Consequently, you may opt to skip ahead. Otherwise, please run:
+
+```bash
+python subject_preprocess_rsa.py id=0002
+python subject_preprocess_rerp.py id=0002
+```
+
+Both scripts will require user input for trial flagging, ICA, and final trial selection. Note that you will have to run these steps for all subjects (0002-0037). Note also that this will overwrite our preprocessed data.
+
 #### ❕ Optional: Behavioural analysis (task one)
 Aggregate behavioural data by running:
 
