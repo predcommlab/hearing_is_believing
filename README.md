@@ -90,6 +90,109 @@ device=str      If backend is torch, which device should be used (mps/cuda/cpu)?
 ```
 These will dramatically influence computation times. Per default, all scripts will try to use torch with CUDA acceleration. **Note** that the default behaviour of these scripts is to distribute all available CUDA devices across your `n_workers`. If you would like only a specific device to be used, please specify which device should be used, e.g.: 
 
-```python my_script.py n_workers=2 device=torch backend=cuda:0```.
+```python my_script.py n_workers=2 device=torch backend=cuda:0```
 
 ### ❕ Optional: Validation experiment
+Navigate to `./analysis/validation/`. Open `./inference_validation.R`, set the appropriate working directory in `L17` and run the script. Results can be found in `./analysis/validation/results/items.csv`.
+
+### ❕ Optional: Online experiment
+Navigate to `./analysis/online/`. In your terminal, run:
+
+```python run_fe.py```
+
+Next, open a new jupyter notebook like so:
+
+```jupyter notebook```
+
+and open `data.ipynb` and follow the cells to aggregate all the data. Once you have run all cells, you may close the notebook and kernel. In RStudio, open`./run_glmmm.R` and adjust your working directory in `L24`. Run the code. Results will be available from `./analysis/online/results/glmm/`.
+
+### ❗️ Required: EEG experiment
+This is where all analyses will come together and where figures will be created, hence I have marked this section as required. However, as mentioned above, many of these subsections will be computationally expensive. Individual sections that *must* be run will be marked again. Please make sure to navigate to `./analysis/eeg/`.
+
+#### 💡 Hint: File names
+For EEG analysis, files come in essentially four variants. These are:
+
+```
+/analysis/eeg/
+|── audio_*.py          # Files associated with preprocessing audio data
+|── subject_*.py        # Subject-level analysis scripts
+|── group_*.py          # Group-level aggregation or analysis
+|── inference_*         # Group-level statistical inference
+```
+
+Whenever you are interested about available parameters of or the inner workings of some kind of analysis, you will generally want to refer to the corresponding `subject_* .py` file that will contain descriptions of all parameters, usage notes, and the full code and documentation. Note that almost all `group_*` files are convenience scripts that will call individual `subject_*` scripts for all subjects.
+
+#### ❕ Optional: Computing gammatone spectrograms
+Gammatone spectrograms for all stimuli can be extracted by running:
+```
+python audio_preprocess.py fs=200 fsn=200 method=spectrogram
+```
+
+#### ❗️ Required: Computing semantic priors
+During the experiment, we computed real-time estimates of semantic priors that participants had learned. Because these are computed deterministically and they require a relatively decent amount of space, these are not included in OSF. Please run:
+```
+python subject_rtfe.py
+python subject_rtfe.py -generalised
+python subject_rtfe.py -unspecific
+python subject_rtfe.py -generalised -unspecific
+```
+These estimates will be used in all further scripts.
+
+#### ❕ Optional: Behavioural analysis (task one)
+Aggregate behavioural data by running:
+
+```
+python group_beh_mt1.py
+```
+
+Next, open `inference_beh_mt1.R`, adjust the working directory in `L23` and run the script. Results are written to `/analysis/eeg/data/processed/beh/mt1/`.  These will later be used during figure creation.
+
+#### ❗️ Required: Figure 1
+By now, we may replicate figure one by opening a jupyter notebook:
+
+```
+jupyter notebook
+```
+
+and selecting `./fig1_design.ipynb`. Run all cells consecutively. Figures will be saved to `/analysis/eeg/figures/` as `png`, `svg`, and `pdf` files.
+
+#### ❕ Optional: Stimulus reconstruction
+If you would like to run stimulus reconstruction over morphs, please run:
+
+```
+python group_rsa_rec.py n_workers=2 backend=torch device=cuda
+```
+
+Make sure to adjust the parameters as per [performance hints](#-hint-performance). **Note** that you can also skip only this reconstruction step and move on from here: Once stimulus reconstruction has been completed (or skipped), you may run the inference script like so:
+
+```
+python inference_rsa_rec.py
+```
+
+Running this will compute all relevant statistics and tests. These will be available from `/analysis/eeg/data/results/reconstruction.pkl.gz`. Additionally, the script will generate an `MNE` report summarising key results that is available from `/analysis/eeg/data/results/reports/reconstruction.html`.
+
+#### ❕ Optional: Similarity encoding
+If you would like to run similarity encoders from scratch, please run the following script, adjusting parameters [as necessary](#-hint-performance):
+
+```
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda
+```
+
+Results from encoders will be available from `/analysis/eeg/data/results/encoding_b0-m0-c0-k5.pkl.gz` and, for the report, `/analysis/eeg/data/results/reports/encoding_b0-m0-c0-k5.html`.
+
+Next, you may rerun encoders while systematically varying the number of top-k predictions considered like so:
+
+```
+python group_rsa_enc_topk.py n_workers=2 backend=torch device=cuda
+```
+
+Results from top-k encoding will be available from `/analysis/eeg/data/results/encoding_topk_b0-m0-c0.pkl.gz`and `/analysis/eeg/data/results/reports/encoding_topk_b0-m0-c0.html`. In your report, check which number of k produced the best models. We know, of course, that this is going to be `k=19`, so let us now refit our original similarity encoders to make sure our results remain robust:
+
+```
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19
+```
+
+Check your results in `/analysis/eeg/data/results/encoding_b0-m0-c0-k19.pkl.gz` and `/analysis/eeg/data/results/reports/encoding_b0-m0-c0-k19.html`.
+
+#### ❗️ Required: Figure 2
+We now have all 
