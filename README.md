@@ -157,7 +157,7 @@ python
 >>> rsa.analysis.estimators.torch.unit_tests_TimeDelayed_rec(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_Encoder(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_Temporal(device = 'cpu')
->>> rsa.analysis.estimators.torch.unit_tests_SparseEncoderdevice = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_SparseEncoder(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_Decoder(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_B2B(device = 'cpu')
 ```
