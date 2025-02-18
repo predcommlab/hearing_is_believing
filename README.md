@@ -92,6 +92,37 @@ These will dramatically influence computation times. Per default, all scripts wi
 
 ```python my_script.py n_workers=2 device=torch backend=cuda:0```
 
+### 💡 Hint: Validate your installation
+If you would like to fully replicate key results from our paper---specifically, refitting our models rather than using the provided solutions---you should now ensure that everything is running smoothly. To do so, please navigate to `./analysis/eeg/` in your terminal. Now, run:
+
+```
+conda activate sempriors
+python
+>>> import rsa
+>>> rsa.analysis.estimators.unit_tests_TimeDelayed_trf()
+>>> rsa.analysis.estimators.unit_tests_TimeDelayed_rec()
+>>> rsa.analysis.estimators.unit_tests_Encoder()
+>>> rsa.analysis.estimators.unit_tests_Temporal()
+>>> rsa.analysis.estimators.unit_tests_SparseEncoder()
+>>> rsa.analysis.estimators.unit_tests_Decoder()
+>>> rsa.analysis.estimators.unit_tests_B2B()
+```
+
+For each of these, you should receive `True` as an output if tests are passed. Please repeat these tests for the `torch` backend like so, where you may optionally test a different device:
+
+```
+conda activate sempriors
+python
+>>> import rsa
+>>> rsa.analysis.estimators.torch.unit_tests_TimeDelayed_trf(device = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_TimeDelayed_rec(device = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_Encoder(device = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_Temporal(device = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_SparseEncoderdevice = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_Decoder(device = 'cpu')
+>>> rsa.analysis.estimators.torch.unit_tests_B2B(device = 'cpu')
+```
+
 ### ❕ Optional: Validation experiment
 Navigate to `./analysis/validation/`. Open `./inference_validation.R`, set the appropriate working directory in `L17` and run the script. Results can be found in `./analysis/validation/results/items.csv`.
 
@@ -195,4 +226,37 @@ python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19
 Check your results in `/analysis/eeg/data/results/encoding_b0-m0-c0-k19.pkl.gz` and `/analysis/eeg/data/results/reports/encoding_b0-m0-c0-k19.html`.
 
 #### ❗️ Required: Figure 2
-We now have all 
+We now have all results available to reproduce figure two from the paper. If necessary, open your jupyter notebook
+
+```
+jupyter notebook
+```
+
+and select `./fig2_predictions.ipynb`. Run all cells consecutively and find the resulting figure in `/analysis/eeg/figures/` as `png`, `svg`, and `pdf`.
+
+
+#### ❕ Optional: Single-trial EEG encoding (task one)
+First, please extract the full LLM activations---because these are quite large, it is genuinely faster to quickly extract them yourself rather than having to download them. **Note** that we do provide subspace projections, so you may also choose to skip this. To do this, please run
+
+```
+python audio_w2v2.py device=cuda folder=narrative
+python audio_w2v2.py device=cuda folder=morphed
+python audio_w2v2.py device=cuda folder=clear
+python audio_w2v2.py device=cuda folder=vocoded
+```
+
+Next, perform the subspace projection like so:
+
+```
+python audio_w2v2_pca.py n_features=5
+python audio_w2v2_pca.py n_features=10
+```
+
+Finally, run the back-to-back decoders to evaluate all layers:
+
+```
+python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=5
+python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=10
+```
+
+Once this is completed, 
