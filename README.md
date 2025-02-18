@@ -5,19 +5,35 @@
 Schneider, F., & Blank, H. (2025). Hearing Is Believing.
 ```
 
+Please cite this work as:
+
+```graphql
+@article{
+    Hearing is Believing,
+    author = {Fabian Schneider, Helen Blank},
+    title = {Hearing Is Beliveing},
+    journal = {...}    
+}
+```
+
 ## 🚀 Getting started
 ### ❗️ Required: Installation (Python)
-Make sure you have [anaconda](https://anaconda.org) installed. Open your terminal, navigate to your working directory for this project and create a new environment:
-```
+Make sure you have [anaconda](https://anaconda.org) installed. Open your terminal, navigate to your working directory for this project and create a fresh environment:
+
+```bash
 conda create -n "sempriors" python=3.10.9
 conda activate sempriors
 ```
+
 Next, install all requirements for the project:
+
 ```
 conda install --yes --file requirements.txt
 ```
+
 If you are on an intel machine, please also run:
-```
+
+```bash
 pip install intel-numpy
 pip install scikit-learn-intelex
 ```
@@ -29,17 +45,20 @@ For more information, please consult their [offical documentation](https://pytor
 
 ### ❗️ Required: Installation (R)
 Please make sure to install R and, ideally, [RStudio](https://posit.co/download/rstudio-desktop/). Note that our machines run on `R version 4.0.3 (2020-10-10)`. Once installed, please open RStudio and install the requirements like so:
-```
+
+```R
 install.packages(c('lme4', 'lmerTest', 'emmeans', 'DHARMa', 'ggplot2', 'viridis'))
 ```
 
 ### ❗️ Required: Downloading data
 In your terminal, navigate to the top level of your working directory and download the data like so:
-```
+
+```bash
 pip install osfclient
 osf init
 osf -p ctrma fetch -r / ./
 ```
+
 Upon the init command, you may be prompted to input your OSF account and the project id, which is `ctrma`. Downloading all data may take a while, as the project is about `50GB`. Please verify you have enough space before trying to download the data.
 
 Alternatively, use your browser to navigate to [https://osf.io/ctrma](https://osf.io/ctrma) and download the full zip. Make sure to extract it to the top-level directory.
@@ -83,19 +102,23 @@ Here, we will walk through the basic steps of replicating all analyses reported 
 
 ### 💡 Hint: Performance
 Almost all computationally expensive modelling is done in the python scripts. For all of these, you may specify three key settings in your calls:
-```
+
+```bash
 n_workers=n     How many jobs are we running in parallel?
 backend=str     Which backend should be used (numpy/torch)?
 device=str      If backend is torch, which device should be used (mps/cuda/cpu)?
 ```
+
 These will dramatically influence computation times. Per default, all scripts will try to use torch with CUDA acceleration. **Note** that the default behaviour of these scripts is to distribute all available CUDA devices across your `n_workers`. If you would like only a specific device to be used, please specify which device should be used, e.g.: 
 
-```python my_script.py n_workers=2 device=torch backend=cuda:0```
+```bash
+python my_script.py n_workers=2 device=torch backend=cuda:0
+```
 
 ### 💡 Hint: Validate your installation
 If you would like to fully replicate key results from our paper---specifically, refitting our models rather than using the provided solutions---you should now ensure that everything is running smoothly. To do so, please navigate to `./analysis/eeg/` in your terminal. Now, run:
 
-```
+```bash
 conda activate sempriors
 python
 >>> import rsa
@@ -110,7 +133,7 @@ python
 
 For each of these, you should receive `True` as an output if tests are passed. Please repeat these tests for the `torch` backend like so, where you may optionally test a different device:
 
-```
+```bash
 conda activate sempriors
 python
 >>> import rsa
@@ -129,11 +152,15 @@ Navigate to `./analysis/validation/`. Open `./inference_validation.R`, set the a
 ### ❕ Optional: Online experiment
 Navigate to `./analysis/online/`. In your terminal, run:
 
-```python run_fe.py```
+```bash
+python run_fe.py
+```
 
 Next, open a new jupyter notebook like so:
 
-```jupyter notebook```
+```bash
+jupyter notebook
+```
 
 and open `data.ipynb` and follow the cells to aggregate all the data. Once you have run all cells, you may close the notebook and kernel. In RStudio, open`./run_glmmm.R` and adjust your working directory in `L24`. Run the code. Results will be available from `./analysis/online/results/glmm/`.
 
@@ -155,24 +182,27 @@ Whenever you are interested about available parameters of or the inner workings 
 
 #### ❕ Optional: Computing gammatone spectrograms
 Gammatone spectrograms for all stimuli can be extracted by running:
-```
+
+```bash
 python audio_preprocess.py fs=200 fsn=200 method=spectrogram
 ```
 
 #### ❗️ Required: Computing semantic priors
 During the experiment, we computed real-time estimates of semantic priors that participants had learned. Because these are computed deterministically and they require a relatively decent amount of space, these are not included in OSF. Please run:
-```
+
+```bash
 python subject_rtfe.py
 python subject_rtfe.py -generalised
 python subject_rtfe.py -unspecific
 python subject_rtfe.py -generalised -unspecific
 ```
+
 These estimates will be used in all further scripts.
 
 #### ❕ Optional: Behavioural analysis (task one)
 Aggregate behavioural data by running:
 
-```
+```bash
 python group_beh_mt1.py
 ```
 
@@ -181,7 +211,7 @@ Next, open `inference_beh_mt1.R`, adjust the working directory in `L23` and run 
 #### ❗️ Required: Figure 1
 By now, we may replicate figure one by opening a jupyter notebook:
 
-```
+```bash
 jupyter notebook
 ```
 
@@ -196,7 +226,7 @@ python group_rsa_rec.py n_workers=2 backend=torch device=cuda
 
 Make sure to adjust the parameters as per [performance hints](#-hint-performance). **Note** that you can also skip only this reconstruction step and move on from here: Once stimulus reconstruction has been completed (or skipped), you may run the inference script like so:
 
-```
+```bash
 python inference_rsa_rec.py
 ```
 
@@ -213,14 +243,14 @@ Results from encoders will be available from `/analysis/eeg/data/results/encodin
 
 Next, you may rerun encoders while systematically varying the number of top-k predictions considered like so:
 
-```
+```bash
 python group_rsa_enc_topk.py n_workers=2 backend=torch device=cuda
 python inference_rsa_enc_topk.py
 ```
 
 Results from top-k encoding will be available from `/analysis/eeg/data/results/encoding_topk_b0-m0-c0.pkl.gz`and `/analysis/eeg/data/results/reports/encoding_topk_b0-m0-c0.html`. In your report, check which number of k produced the best models. We know, of course, that this is going to be `k=19`, so let us now refit our original similarity encoders to make sure our results remain robust:
 
-```
+```bash
 python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19
 python inference_rsa_enc.py n_topk=19
 ```
@@ -230,7 +260,7 @@ Check your results in `/analysis/eeg/data/results/encoding_b0-m0-c0-k19.pkl.gz` 
 #### ❗️ Required: Figure 2
 We now have all results available to reproduce figure two from the paper. If necessary, open your jupyter notebook
 
-```
+```bash
 jupyter notebook
 ```
 
@@ -240,7 +270,7 @@ and select `./fig2_predictions.ipynb`. Run all cells consecutively and find the 
 #### ❕ Optional: Single-trial EEG encoding (task one)
 First, please extract the full LLM activations---because these are quite large, it is genuinely faster to quickly extract them yourself rather than having to download them. **Note** that we do provide subspace projections, so you may also choose to skip this. To do this, please run
 
-```
+```bash
 python audio_w2v2.py device=cuda folder=narrative
 python audio_w2v2.py device=cuda folder=morphed
 python audio_w2v2.py device=cuda folder=clear
@@ -249,21 +279,21 @@ python audio_w2v2.py device=cuda folder=vocoded
 
 Next, perform the subspace projection like so:
 
-```
+```bash
 python audio_w2v2_pca.py n_features=5
 python audio_w2v2_pca.py n_features=10
 ```
 
 Finally, run the back-to-back decoders to evaluate all layers:
 
-```
+```bash
 python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=5
 python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=10
 ```
 
 Once this is completed, we may run the single-trial encoding models like so:
 
-```
+```bash
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=inv
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=spc
 python inference_rerp_mt1.py s_bsl=llm n_features=5 s_mod=inv
@@ -272,7 +302,7 @@ python inference_rerp_mt1.py s_bsl=llm n_features=5 s_mod=spc
 
 You may check results in `/analysis/eeg/data/results/rerp-mt1-k5-z0-s0-b0-inv-llm5.pkl.gz`, `/analysis/eeg/data/results/rerp-mt1-k5-z0-s0-b0-spc-llm5.pkl.gz` and, of course, reports in `/analysis/eeg/data/results/reports/rerp-mt1-k5-z0-s0-b0-inv-llm5.html` and `/analysis/eeg/data/results/reports/rerp-mt1-k5-z0-s0-b0-spc-llm5.html`. From these reports, find the best models and coefficients and run:
 
-```
+```bash
 python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=inv n_mod=2 a_coefs=all
 python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=spc n_mod=2 a_coefs=all
 python inference_rerp_mt1_knockout.py s_bsl=llm n_features=5 s_mod=inv n_mod=2 a_coefs=all
@@ -283,7 +313,7 @@ Results from knock-outs are available from `/analysis/eeg/data/results/rerp-mt1-
 
 To replicate the robustness of these findings in the higher subspace projection and with respect to target words, please run:
 
-```
+```bash
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=inv
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=spc
 python inference_rerp_mt1.py s_bsl=llm n_features=10 s_mod=inv
@@ -295,9 +325,9 @@ python inference_rerp_mt1_knockout.py s_bsl=llm n_features=10 s_mod=inv n_mod=2 
 python inference_rerp_mt1_knockout.py s_bsl=llm n_features=10 s_mod=spc n_mod=2 a_coefs=all
 ```
 
-and for 10-dimensional LLM activations, as well as, for targets: 
+and:
 
-```
+```bash
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=inv
 python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=spc
 python inference_rerp_mt1.py s_bsl=tar s_mod=inv
@@ -312,13 +342,28 @@ python inference_rerp_mt1_knockout.py s_bsl=tar s_mod=spc n_mod=2 a_coefs=all
 #### ❗️ Required: Figure 3
 We can now reproduce figure three from the paper. Again, open your jupyter notebook:
 
-```
+```bash
 jupyter notebook
 ```
 
 and select `./fig3_surprisal.ipynb`. Run all cells consecutively and find the figures in `/analysis/eeg/figures/` as `png`, `svg`, and `pdf`.
 
 #### ❕ Optional: Modeling response times by congruency (task two)
+First, aggregate all behavioural data from task two:
 
+```
+python group_beh_mt2.py
+```
+
+Next, open `/analysis/eeg/inference_beh_mt2.R`, adjust the working directory in `L23` and run the script. Outputs are available from `/analysis/eeg/data/processed/beh/mt2/` and will be used for plotting.
 
 #### ❕ Optional: Single-trial EEG encoding (task two)
+To replicate single-trial EEG encoding in task two, please run:
+
+```bash
+python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=1 b_inc=0 s_mod=inv
+python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=0 b_inc=1 s_mod=inv
+python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=1 b_inc=0 s_mod=spc
+python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=0 b_inc=1 s_mod=spc
+```
+
