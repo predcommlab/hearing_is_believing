@@ -1039,7 +1039,7 @@ def unit_tests_TimeDelayed_trf() -> bool:
     rf.fit(X, y)
     
     # get fitted function
-    fit = rf.coef_.squeeze()
+    fit = rf.coef_.squeeze()[...,1:]
     
     # compare fits
     r = spearmanr(trf, fit).mean()
