@@ -18,7 +18,16 @@ Please cite this work as:
 
 ## 🚀 Getting started
 ### ❗️ Required: Installation (Python)
-Make sure you have [anaconda](https://anaconda.org) installed. Open your terminal, navigate to your working directory for this project and create a fresh environment:
+Make sure you have [anaconda](https://anaconda.org) installed. Open your terminal, navigate to your working directory for this project and create a fresh environment, however suits you best:
+
+#### 1: From environment
+You can create the environment directly from the conda environment I used through:
+```bash
+conda env create -f environment.yml
+conda activate sempriors
+```
+
+#### 2: From requirements
 
 ```bash
 conda create -n "sempriors" python=3.10.9
@@ -31,6 +40,7 @@ Next, install all requirements for the project:
 conda install --yes --file requirements.txt
 ```
 
+#### 💡 Hint: Using Intel Machines
 If you are on an intel machine, please also run:
 
 ```bash
