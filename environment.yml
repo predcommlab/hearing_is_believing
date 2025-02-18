@@ -509,4 +509,3 @@ dependencies:
       - torch==2.5.1
       - torch-ridge==0.1
       - triton==3.1.0
-prefix: /home/fschneider/anaconda3/envs/sempriors
