@@ -134,6 +134,8 @@ If you would like to fully replicate key results from our paper---specifically, 
 conda activate sempriors
 python
 >>> import rsa
+>>> rsa.math.unit_tests_2d()
+>>> rsa.math.unit_tests_3d()
 >>> rsa.analysis.estimators.unit_tests_TimeDelayed_trf()
 >>> rsa.analysis.estimators.unit_tests_TimeDelayed_rec()
 >>> rsa.analysis.estimators.unit_tests_Encoder()
@@ -149,6 +151,8 @@ For each of these, you should receive `True` as an output if tests are passed. P
 conda activate sempriors
 python
 >>> import rsa
+>>> rsa.math.torch.unit_tests_2d(device = 'cpu')
+>>> rsa.math.torch.unit_tests_3d(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_TimeDelayed_trf(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_TimeDelayed_rec(device = 'cpu')
 >>> rsa.analysis.estimators.torch.unit_tests_Encoder(device = 'cpu')
