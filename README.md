@@ -215,12 +215,14 @@ Next, you may rerun encoders while systematically varying the number of top-k pr
 
 ```
 python group_rsa_enc_topk.py n_workers=2 backend=torch device=cuda
+python inference_rsa_enc_topk.py
 ```
 
 Results from top-k encoding will be available from `/analysis/eeg/data/results/encoding_topk_b0-m0-c0.pkl.gz`and `/analysis/eeg/data/results/reports/encoding_topk_b0-m0-c0.html`. In your report, check which number of k produced the best models. We know, of course, that this is going to be `k=19`, so let us now refit our original similarity encoders to make sure our results remain robust:
 
 ```
 python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19
+python inference_rsa_enc.py n_topk=19
 ```
 
 Check your results in `/analysis/eeg/data/results/encoding_b0-m0-c0-k19.pkl.gz` and `/analysis/eeg/data/results/reports/encoding_b0-m0-c0-k19.html`.
@@ -259,4 +261,64 @@ python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=
 python audio_w2v2_selection.py n_workers=2 backend=torch device=cuda n_features=10
 ```
 
-Once this is completed, 
+Once this is completed, we may run the single-trial encoding models like so:
+
+```
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=inv
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=spc
+python inference_rerp_mt1.py s_bsl=llm n_features=5 s_mod=inv
+python inference_rerp_mt1.py s_bsl=llm n_features=5 s_mod=spc
+```
+
+You may check results in `/analysis/eeg/data/results/rerp-mt1-k5-z0-s0-b0-inv-llm5.pkl.gz`, `/analysis/eeg/data/results/rerp-mt1-k5-z0-s0-b0-spc-llm5.pkl.gz` and, of course, reports in `/analysis/eeg/data/results/reports/rerp-mt1-k5-z0-s0-b0-inv-llm5.html` and `/analysis/eeg/data/results/reports/rerp-mt1-k5-z0-s0-b0-spc-llm5.html`. From these reports, find the best models and coefficients and run:
+
+```
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=inv n_mod=2 a_coefs=all
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=5 s_mod=spc n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=llm n_features=5 s_mod=inv n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=llm n_features=5 s_mod=spc n_mod=2 a_coefs=all
+```
+
+Results from knock-outs are available from `/analysis/eeg/data/results/rerp-mt1-ko-n2-call-k5-z0-s0-b0-spc-llm5.pkl.gz`, `/analysis/eeg/data/results/rerp-mt1-ko-n2-call-k5-z0-s0-b0-inv-llm5.pkl.gz`, and reports are available from `/analysis/eeg/data/results/reports/rerp-mt1-ko-n2-call-k5-z0-s0-b0-inv-llm5.html` and `/analysis/eeg/data/results/reports/rerp-mt1-ko-n2-call-k5-z0-s0-b0-spc-llm5.html`.
+
+To replicate the robustness of these findings in the higher subspace projection and with respect to target words, please run:
+
+```
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=inv
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=spc
+python inference_rerp_mt1.py s_bsl=llm n_features=10 s_mod=inv
+python inference_rerp_mt1.py s_bsl=llm n_features=10 s_mod=spc
+
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=inv n_mod=2 a_coefs=all
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=llm n_features=10 s_mod=spc n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=llm n_features=10 s_mod=inv n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=llm n_features=10 s_mod=spc n_mod=2 a_coefs=all
+```
+
+and for 10-dimensional LLM activations, as well as, for targets: 
+
+```
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=inv
+python group_rerp_mt1.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=spc
+python inference_rerp_mt1.py s_bsl=tar s_mod=inv
+python inference_rerp_mt1.py s_bsl=tar s_mod=spc
+
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=inv n_mod=2 a_coefs=all
+python group_rerp_mt1_knockout.py n_workers=2 backend=torch device=cuda s_bsl=tar s_mod=spc n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=tar s_mod=inv n_mod=2 a_coefs=all
+python inference_rerp_mt1_knockout.py s_bsl=tar s_mod=spc n_mod=2 a_coefs=all
+```
+
+#### ❗️ Required: Figure 3
+We can now reproduce figure three from the paper. Again, open your jupyter notebook:
+
+```
+jupyter notebook
+```
+
+and select `./fig3_surprisal.ipynb`. Run all cells consecutively and find the figures in `/analysis/eeg/figures/` as `png`, `svg`, and `pdf`.
+
+#### ❕ Optional: Modeling response times by congruency (task two)
+
+
+#### ❕ Optional: Single-trial EEG encoding (task two)
