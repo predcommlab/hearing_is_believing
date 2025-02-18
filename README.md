@@ -75,5 +75,21 @@ Your repository should now look roughly like this:
 |────── /text-embedding-ada-002/    # GPT3 embeddings
 |────── /llama-7b/                  # LLama7b embeddings
 |────── /bert-base-german-cased/    # BERT embeddings
-│── README.md      # This file
+│── README.md               # This file
 ```
+
+## ⚙️ Usage
+Here, we will walk through the basic steps of replicating all analyses reported in the paper and supplement. Not all steps that we report here will be necessary, if all you want to do is replicate the figures from our paper, as all processed data are included in OSF. This is because EEG analysis in particular is computationally expensive. For reference, we used two `NVIDIA RTX 5000 Ada` GPUs and the full analysis took about three weeks to run. Therefore, you may skip all optional steps if you would like to reproduce figures from processed results.
+
+### 💡 Hint: Performance
+Almost all computationally expensive modelling is done in the python scripts. For all of these, you may specify three key settings in your calls:
+```
+n_workers=n     How many jobs are we running in parallel?
+backend=str     Which backend should be used (numpy/torch)?
+device=str      If backend is torch, which device should be used (mps/cuda/cpu)?
+```
+These will dramatically influence computation times. Per default, all scripts will try to use torch with CUDA acceleration. **Note** that the default behaviour of these scripts is to distribute all available CUDA devices across your `n_workers`. If you would like only a specific device to be used, please specify which device should be used, e.g.: 
+
+```python my_script.py n_workers=2 device=torch backend=cuda:0```.
+
+### ❕ Optional: Validation experiment
