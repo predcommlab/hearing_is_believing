@@ -365,5 +365,35 @@ python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=1 b_inc=0 s
 python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=0 b_inc=1 s_mod=inv
 python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=1 b_inc=0 s_mod=spc
 python group_rerp_mt2.py n_workers=2 backend=torch device=cuda b_con=0 b_inc=1 s_mod=spc
+
+python inference_rerp_mt2.py b_con=1 b_inc=0 s_mod=inv
+python inference_rerp_mt2.py b_con=0 b_inc=1 s_mod=inv
+python inference_rerp_mt2.py b_con=1 b_inc=0 s_mod=spc
+python inference_rerp_mt2.py b_con=0 b_inc=1 s_mod=spc
 ```
 
+Outputs will be available from `/analysis/eeg/data/results/rerp-mt2-c0-i1-k5-z0-s0-b0-inv.pkl.gz`, `/analysis/eeg/data/results/rerp-mt2-c0-i1-k5-z0-s0-b0-spc.pkl.gz`, `/analysis/eeg/data/results/rerp-mt2-c1-i0-k5-z0-s0-b0-inv.pkl.gz/`, `/analysis/eeg/data/results/rerp-mt2-c1-i0-k5-z0-s0-b0-spc.pkl.gz`, and, of course, the corresponding reports in `/analysis/eeg/data/results/reports/`. 
+
+Again, please check the reports to identify the best performing models each. We know that these will be speaker-invariant and speaker-specific semantic surprisal for incongruent and congruent trials, respectively. Hence, we can run the following:
+
+```bash
+python group_rerp_mt2_knockout.py n_workers=2 backend=torch device=cuda b_con=0 b_inc=1 s_mod=inv n_mod=2 a_coefs=all
+python group_rerp_mt2_knockout.py n_workers=2 backend=torch device=cuda b_con=1 b_inc=0 s_mod=spc n_mod=2 a_coefs=all
+
+python inference_rerp_mt2_knockout.py b_con=0 b_inc=1 s_mod=inv n_mod=2 a_coefs=all
+python inference_rerp_mt2_knockout.py b_con=1 b_inc=0 s_mod=spc n_mod=2 a_coefs=all
+```
+
+This will generate our final output data in `/analysis/eeg/data/results/rerp-mt2-ko-m2-c0-i1-k5-z0-s0-b0-inv.pkl.gz`, `/analysis/eeg/data/results/rerp-mt2-ko-m2-c1-i0-k5-z0-s0-b0-spc.pkl.gz`, and in `/analysis/eeg/data/results/reports/`.
+
+#### ❗️ Required: Figure 4
+We have now replicated all analysis steps from the paper. To recreate figure four, let's open our jupyter notebook again:
+
+```bash
+jupyter notebook
+```
+
+Select `./fig4_limits.ipynb` and run all cells. Figures will be exported to `/analysis/eeg/figures/` as `png`, `svg`, and `pdf`.
+
+#### ❗️ Required: Supplementary Figures and Tables
+At this point, we have also run all steps of control analysis already. Consequently, we can already generate supplementary results. We will not go through each individual file here, but they are all available in notebooks following `suppfig_*.ipynb`. Running all cells within these notebooks will output figures to `/analysis/eeg/figures/` and will output a neat LaTeX table with key results that need to be reported.
