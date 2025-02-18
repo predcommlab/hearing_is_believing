@@ -22,12 +22,14 @@ Make sure you have [anaconda](https://anaconda.org) installed. Open your termina
 
 #### 1: From environment
 You can create the environment directly from the conda environment I used through:
+
 ```bash
 conda env create -f environment.yml
 conda activate sempriors
 ```
 
 #### 2: From requirements
+Alternatively, you can use the frozen requirements from our machine like so:
 
 ```bash
 conda create -n "sempriors" python=3.10.9
