@@ -8,7 +8,10 @@
 
 ./analysis/validation/data/*
 ./analysis/online/data/*
-./analysis/eeg/data/*
+./analysis/eeg/data/raw/*
+./analysis/eeg/data/preprocessed/*
+./analysis/eeg/data/processed/*
+./analysis/eeg/data/results/*
 
 ./analysis/spaces/dumps/*
 ./analysis/spaces/llama-7b/*
@@ -19,3 +22,6 @@
 *.wav
 *.npy
 *.gz.pkl
+*.fif
+*.eeg
+*.osfcli.config
