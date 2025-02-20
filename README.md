@@ -18,27 +18,22 @@ Please cite this work as:
 
 ## 🚀 Getting started
 ### ❗️ Required: Installation (Python)
-Make sure you have [anaconda](https://anaconda.org) installed. Open your terminal, navigate to your working directory for this project and create a fresh environment, however suits you best:
+Make sure  you have [anaconda](https://anaconda.org) installed on your system. Open your terminal, navigate to your root directory for this project and create a fresh environment, however suits you best:
 
-#### 1: From environment
-You can create the environment directly from the conda environment I used through:
-
+#### 1: On unix
+On unix systems, we can use mamba for a quick installation like so:
 ```bash
-conda env create -f environment.yml
+brew install mamba
+mamba env create -f environment.yml
 conda activate sempriors
 ```
 
-#### 2: From requirements
-Alternatively, you can use the frozen requirements from our machine like so:
+#### 2: On Windows
+On Windows, it will be easiest to create the environment manually:
 
 ```bash
 conda create -n "sempriors" python=3.10.9
 conda activate sempriors
-```
-
-Next, install all requirements for the project:
-
-```
 conda install --yes --file requirements.txt
 ```
 
@@ -74,6 +69,30 @@ osf -p ctrma fetch -r / ./
 Upon the init command, you may be prompted to input your OSF account and the project id, which is `ctrma`. Downloading all data may take a while, as the project is about `50GB`. Please verify you have enough space before trying to download the data.
 
 Alternatively, use your browser to navigate to [https://osf.io/ctrma](https://osf.io/ctrma) and download the full zip. Make sure to extract it to the top-level directory.
+
+Once you have obtained the data, please navigate to your root directory and unzip individual folders like so:
+
+#### 1: On unix:
+```bash
+unzip ./analysis/eeg/data/raw/audio.zip ./analysis/eeg/data/raw/
+unzip ./analysis/eeg/data/preprocessed/audio.zip ./analysis/eeg/data/preprocessed/audio.zip
+unzip ./analysis/eeg/data/raw/eeg/subs0.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/subs1.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/subs2.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/subs3.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/subs4.zip ./analysis/eeg/data/raw/eeg/
+```
+
+#### 2: On Windows:
+```bash
+tar -xzf ./analysis/eeg/data/raw/audio.zip -C ./analysis/eeg/data/raw/
+tar -xzf ./analysis/eeg/data/preprocessed/audio.zip -C ./analysis/eeg/data/preprocessed/audio.zip
+tar -xzf ./analysis/eeg/data/raw/eeg/subs0.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/subs1.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/subs2.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/subs3.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/subs4.zip -C ./analysis/eeg/data/raw/eeg/
+```
 
 ## 🗂️ Project structure
 Your repository should now look roughly like this:
@@ -423,3 +442,11 @@ Select `./fig4_limits.ipynb` and run all cells. Figures will be exported to `/an
 
 #### ❗️ Required: Supplementary Figures and Tables
 At this point, we have also run all steps of control analysis already. Consequently, we can already generate supplementary results. We will not go through each individual file here, but they are all available in notebooks following `suppfig_*.ipynb`. Running all cells within these notebooks will output figures to `/analysis/eeg/figures/` and will output a neat LaTeX table with key results that need to be reported.
+
+## 🪣 Clean-up
+Once you've replicated our results and are ready to move on, don't forget to clean-up your hard-drive. You can simply remove the root directory manually and run:
+
+```bash
+conda deactivate sempriors
+conda remove -n sempriors --all
+```
