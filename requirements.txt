@@ -1,7 +1,7 @@
 annotated_types==0.7.0
 arviz==0.20.0
 beautifulsoup4==4.11.2
-Gammatone==1.0
+gammatone@git+https://github.com/detly/gammatone
 gensim==4.3.0
 librosa==0.10.1
 matplotlib==3.7.0
