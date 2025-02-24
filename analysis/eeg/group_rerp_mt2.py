@@ -1,5 +1,9 @@
 '''
+Quick script to run encoding analysis over
+all subjects in final task.
 
+All options available to `subject_rerp_mt2.py` can
+be passed to this script.
 '''
 
 import os, aux, data

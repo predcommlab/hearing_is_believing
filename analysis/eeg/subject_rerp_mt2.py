@@ -418,7 +418,7 @@ if __name__ == '__main__':
     beh_mt2 = df.loc[(df.type == data.defs.TRIAL_ET_BAD) | (df.type == data.defs.TRIAL_ET_GOOD)].reset_index(drop = True)
     
     print(f'[PRE] Loading SUBTLEX-de...')
-    subtlex = pd.read_excel('../../semantic_spaces/dumps/subtlex-de.xlsx')
+    subtlex = pd.read_excel('../spaces/dumps/subtlex-de.xlsx')
     sub_dict = np.array(subtlex.Word.tolist())
     
     # load flagged trials

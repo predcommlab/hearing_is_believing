@@ -15,7 +15,7 @@ supplying, e.g., `-gpt`.
 
 import sys
 sys.path.append('../spaces/')
-sys.path.append('../experiments/eeg/')
+sys.path.append('../../experiments/eeg/')
 
 import embeddings as emb
 import data, rsa
@@ -57,10 +57,10 @@ class RTFE:
         self.dir = dir
 
         # load reduced glove
-        self.G = emb.glove.load_embedding(f_in = '../../exp4_eeg/resources/model/w2v_50D.txt')
+        self.G = emb.glove.load_embedding(f_in = './data/preprocessed/misc/glove/w2v_50D.txt')
         
         # load priors
-        with open('../../exp4_eeg/resources/model/priors.npy', 'rb') as f:
+        with open('./data/preprocessed/misc/glove/priors.npy', 'rb') as f:
             self.priors = np.load(f)
         
         # setup speakers

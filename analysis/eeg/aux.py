@@ -9,6 +9,13 @@ from typing import Any, Union, Callable
 
 def timestamp(s: float) -> str:
     '''
+    Get a timestamp from time measurement s.
+    
+    INPUTS:
+        s   -   Measurement of time (analogous to time.time())
+    
+    OUTPUTS:
+        str -   Formatted string (hh:mm:ss)
     '''
     
     hrs = int(s // 3600)
@@ -19,6 +26,16 @@ def timestamp(s: float) -> str:
 
 def progressbar(i: int, N: int, ts: float, bars: int = 40, bar_chr: str = '-', emp_chr: str = ' ', msg: str = '') -> None:
     '''
+    Update a progressbar.
+    
+    INPUTS:
+        i           -   Task number
+        N           -   Total number of tasks
+        ts          -   Time at which tasks were started
+        bars        -   How many bars should be displayed for 100%?
+        bar_chr     -   What character do we display for completed bars?
+        emp_chr     -   What should be displayed in lieu of a bar, i.e. when empty?
+        msg         -   What message should precede the progressbar?
     '''
     
     i += 1
