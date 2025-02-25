@@ -29,12 +29,11 @@ conda activate sempriors
 ```
 
 #### 2: On Windows
-On Windows, it will be easiest to create the environment manually:
+On Windows, it'll be easiest to skip mamba and install from environment like so:
 
 ```bash
-conda create -n "sempriors" python=3.10.9
+conda env create -f environment.yml
 conda activate sempriors
-conda install --yes --file requirements.txt
 ```
 
 #### 💡 Hint: Using Intel Machines
@@ -43,6 +42,13 @@ If you are on an intel machine, please also run:
 ```bash
 pip install intel-numpy
 pip install scikit-learn-intelex
+```
+
+#### 💡 Hint: PyTensor errors
+Should you encounter PyTensor errors related to gcc/gxx, the easiest fix will be to run
+
+```bash
+pip install --upgrade pymc
 ```
 
 ### ❕ Optional: GPU Acceleration (Python)
