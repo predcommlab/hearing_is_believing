@@ -424,7 +424,7 @@ if __name__ == '__main__':
     # setup data structure
     print(f'')
     print(f'[REC] Collecting results...')
-    window = (np.arange(t_min, t_max, 1 / fs) * fs).astype(int)
+    window = (np.arange(t_min, t_max + 1 / fs, 1 / fs) * fs).astype(int)
     
     r = np.zeros((n_permutations, y.shape[1]))
     P = np.zeros((n_permutations, y.shape[1], X_mt1.shape[1], window.shape[0]))
