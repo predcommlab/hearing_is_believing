@@ -28,7 +28,7 @@ import torch
 import torch.nn as nn
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
-import aux
+import auxiliary as aux
 
 if __name__ == '__main__':
     '''

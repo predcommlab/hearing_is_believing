@@ -12,7 +12,9 @@ statistical results in a convenient place.
 '''
 
 import mne, json, warnings
-import sys, os, aux, data, rsa
+import sys, os, data, rsa
+import auxiliary as aux
+
 sys.path.append('../spaces/')
 import pubplot as pub
 pub.styles.set()

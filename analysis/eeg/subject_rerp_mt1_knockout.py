@@ -94,7 +94,8 @@ import time, re
 import numpy as np
 import pandas as pd
 import mne, os, sys, copy
-import aux, data, rsa, models
+import auxiliary as aux
+import data, rsa, models
 import gzip, pickle
 import scipy, sklearn, torch, warnings
 from multiprocessing import freeze_support, set_start_method

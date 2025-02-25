@@ -16,7 +16,8 @@ evaluate. Consequently, this should be done _after_ evaluating results
 from rERP analysis.
 '''
 
-import os, aux, data
+import auxiliary as aux
+import os, data
 
 if __name__ == '__main__':
     # meta options

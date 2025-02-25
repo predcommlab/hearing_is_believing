@@ -61,7 +61,8 @@ import numpy as np
 import torch
 import pandas as pd
 import mne, os, sys, copy
-import aux, data, rsa
+import auxiliary as aux
+import data, rsa
 import gzip, pickle
 import scipy, sklearn, warnings
 from multiprocessing import freeze_support, set_start_method

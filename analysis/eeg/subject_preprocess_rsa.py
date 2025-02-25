@@ -18,7 +18,8 @@ import numpy as np
 import pandas as pd
 import mne
 import os, sys
-import aux, data, rsa
+import data, rsa
+import auxiliary as aux
 import matplotlib.pyplot as plt
 
 sys.path.append('../spaces/')

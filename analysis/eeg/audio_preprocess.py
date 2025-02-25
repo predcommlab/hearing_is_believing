@@ -23,7 +23,7 @@ EXAMPLE USAGE:
     python audio_preprocess.py fs=200 fsn=200 method=spectrogram
 '''
 
-import aux
+import auxiliary as aux
 import numpy as np
 import pandas as pd
 import os

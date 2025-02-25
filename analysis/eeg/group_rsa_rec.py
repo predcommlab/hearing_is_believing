@@ -6,7 +6,8 @@ All options supported by `subject_rsa_rec.py` are
 available here.
 '''
 
-import os, aux, data
+import os, data
+import auxiliary as aux
 
 if __name__ == '__main__':
     # meta options

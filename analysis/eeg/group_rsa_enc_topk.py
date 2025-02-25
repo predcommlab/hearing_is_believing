@@ -5,7 +5,8 @@ All options from `subject_rsa_enc.py` are available here.
 '''
 
 import numpy as np
-import os, aux, data
+import os, data
+import auxiliary as aux
 
 if __name__ == '__main__':
     # meta options

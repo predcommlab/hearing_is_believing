@@ -12,7 +12,8 @@ jected and evaluated. Please see:
     `audio_w2v2.py`, `audio_w2v2_pca.py`, `audio_w2v2_selection.py`
 '''
 
-import os, aux, data
+import auxiliary as aux
+import os, data
 
 if __name__ == '__main__':
     # meta options
