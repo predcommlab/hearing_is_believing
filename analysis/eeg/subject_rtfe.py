@@ -152,7 +152,7 @@ def worker(task: tuple[Any, str, str, int, int], **kwargs: Any) -> bool:
             word = trial.options_0
         else:
             # choice
-            word = trial.options_0 if (trial.correct == True) else trial.options_1 if ((trial.correct == True) & (np.isnan(trial.rt) == False)) else trial.options_0
+            word = trial.options_0 if (trial.correct == True) else trial.options_1 if ((trial.correct == False) & (np.isnan(trial.rt) == False)) else trial.options_0
         
         # determine context
         if unspecific:
