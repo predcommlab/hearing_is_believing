@@ -56,13 +56,13 @@ def cohens_d(x: np.ndarray, y: Union[None, np.ndarray] = None, popmean: Union[No
     if y is None:
         # one-sample t-test
         numerator = x.mean(axis = 0, keepdims = True) - popmean
-        denominator = x.std(axis = 0, keepdims = True)
+        denominator = x.std(axis = 0, keepdims = True, ddof = 1)
     else:
         if paired:
             # paired samples t-test
             z = (x - y)
             numerator = z.mean(axis = 0, keepdims = True)
-            denominator = z.std(axis = 0, keepdims = True)
+            denominator = z.std(axis = 0, keepdims = True, ddof = 1)
         else:
             # student's t-test
             numerator = x.mean(axis = 0, keepdims = True) - y.mean(axis = 0, keepdims = True)
