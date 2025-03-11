@@ -186,6 +186,10 @@ if __name__ == '__main__':
     sd = []
     se = []
     lb, ub = [], []
+    pct_mu = []
+    pct_sd = []
+    pct_se = []
+    pct_lb, pct_ub = [], []
 
     # run contrasts in a
     for i in range(r_a.shape[1]):
@@ -196,6 +200,7 @@ if __name__ == '__main__':
             tests.append(scipy.stats.ttest_rel(r_a[:,i], r_a[:,j]))
             cohensd.append(rsa.stats.cohens_d(r_a[:,i], r_a[:,j], paired = True).squeeze())
             
+            # over raw data
             x = r_a[:,i] - r_a[:,j]
             mu_x = x.mean()
             sd_x = x.std()
@@ -207,6 +212,19 @@ if __name__ == '__main__':
             se.append(se_x)
             lb.append(lb_x)
             ub.append(ub_x)
+
+            # over percentages
+            x = ((r_a[:,i] / r_a[:,j]) - 1) * 100
+            mu_x = x.mean()
+            sd_x = x.std()
+            se_x = rsa.stats.bootstrap_se(x)
+            lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+            
+            pct_mu.append(mu_x)
+            pct_sd.append(sd_x)
+            pct_se.append(se_x)
+            pct_lb.append(lb_x)
+            pct_ub.append(ub_x)
     
     # run contrasts in s
     for i in range(r_s.shape[1]):
@@ -217,6 +235,7 @@ if __name__ == '__main__':
             tests.append(scipy.stats.ttest_rel(r_s[:,i], r_s[:,j]))
             cohensd.append(rsa.stats.cohens_d(r_s[:,i], r_s[:,j], paired = True).squeeze())
             
+            # over raw data
             x = r_s[:,i] - r_s[:,j]
             mu_x = x.mean()
             sd_x = x.std()
@@ -229,6 +248,19 @@ if __name__ == '__main__':
             lb.append(lb_x)
             ub.append(ub_x)
 
+            # over percentages
+            x = ((r_s[:,i] / r_s[:,j]) - 1) * 100
+            mu_x = x.mean()
+            sd_x = x.std()
+            se_x = rsa.stats.bootstrap_se(x)
+            lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+            
+            pct_mu.append(mu_x)
+            pct_sd.append(sd_x)
+            pct_se.append(se_x)
+            pct_lb.append(lb_x)
+            pct_ub.append(ub_x)
+
     # run contrasts in as
     for i in range(r_as.shape[1]):
         for j in range(r_as.shape[1]):
@@ -238,6 +270,7 @@ if __name__ == '__main__':
             tests.append(scipy.stats.ttest_rel(r_as[:,i], r_as[:,j]))
             cohensd.append(rsa.stats.cohens_d(r_as[:,i], r_as[:,j], paired = True).squeeze())
             
+            # over raw data
             x = r_as[:,i] - r_as[:,j]
             mu_x = x.mean()
             sd_x = x.std()
@@ -250,12 +283,26 @@ if __name__ == '__main__':
             lb.append(lb_x)
             ub.append(ub_x)
 
+            # over percentages
+            x = ((r_as[:,i] / r_as[:,j]) - 1) * 100
+            mu_x = x.mean()
+            sd_x = x.std()
+            se_x = rsa.stats.bootstrap_se(x)
+            lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+            
+            pct_mu.append(mu_x)
+            pct_sd.append(sd_x)
+            pct_se.append(se_x)
+            pct_lb.append(lb_x)
+            pct_ub.append(ub_x)
+
     # run contrasts between a, s
     for i in range(r_as.shape[1]):
         name.append(f's-a: {i}')
         tests.append(scipy.stats.ttest_rel(r_s[:,i], r_a[:,i]))
         cohensd.append(rsa.stats.cohens_d(r_s[:,i], r_a[:,i], paired = True).squeeze())
         
+        # over raw data
         x = r_s[:,i] - r_a[:,i]
         mu_x = x.mean()
         sd_x = x.std()
@@ -267,6 +314,19 @@ if __name__ == '__main__':
         se.append(se_x)
         lb.append(lb_x)
         ub.append(ub_x)
+
+        # over percentages
+        x = ((r_s[:,i] / r_a[:,i]) - 1) * 100
+        mu_x = x.mean()
+        sd_x = x.std()
+        se_x = rsa.stats.bootstrap_se(x)
+        lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+        
+        pct_mu.append(mu_x)
+        pct_sd.append(sd_x)
+        pct_se.append(se_x)
+        pct_lb.append(lb_x)
+        pct_ub.append(ub_x)
     
     # run contrasts between a, as
     for i in range(r_as.shape[1]):
@@ -274,6 +334,7 @@ if __name__ == '__main__':
         tests.append(scipy.stats.ttest_rel(r_as[:,i], r_a[:,i]))
         cohensd.append(rsa.stats.cohens_d(r_as[:,i], r_a[:,i], paired = True).squeeze())
         
+        # over raw data
         x = r_as[:,i] - r_a[:,i]
         mu_x = x.mean()
         sd_x = x.std()
@@ -285,6 +346,19 @@ if __name__ == '__main__':
         se.append(se_x)
         lb.append(lb_x)
         ub.append(ub_x)
+
+        # over percentages
+        x = ((r_as[:,i] / r_a[:,i]) - 1) * 100
+        mu_x = x.mean()
+        sd_x = x.std()
+        se_x = rsa.stats.bootstrap_se(x)
+        lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+        
+        pct_mu.append(mu_x)
+        pct_sd.append(sd_x)
+        pct_se.append(se_x)
+        pct_lb.append(lb_x)
+        pct_ub.append(ub_x)
     
     # run contrasts between s, as
     for i in range(r_as.shape[1]):
@@ -292,6 +366,7 @@ if __name__ == '__main__':
         tests.append(scipy.stats.ttest_rel(r_as[:,i], r_s[:,i]))
         cohensd.append(rsa.stats.cohens_d(r_as[:,i], r_s[:,i], paired = True).squeeze())
         
+        # over raw data
         x = r_as[:,i] - r_s[:,i]
         mu_x = x.mean()
         sd_x = x.std()
@@ -304,12 +379,25 @@ if __name__ == '__main__':
         lb.append(lb_x)
         ub.append(ub_x)
 
+        # over percentages
+        x = ((r_as[:,i] / r_s[:,i]) - 1) * 100
+        mu_x = x.mean()
+        sd_x = x.std()
+        se_x = rsa.stats.bootstrap_se(x)
+        lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+        
+        pct_mu.append(mu_x)
+        pct_sd.append(sd_x)
+        pct_se.append(se_x)
+        pct_lb.append(lb_x)
+        pct_ub.append(ub_x)
+
     # correct p-values
     pvalues = np.array([test.pvalue for test in tests])
     pvalues = rsa.stats.bonferroni_holm(pvalues)
 
     # summarise
-    contrasts = {name[i]: dict(contrast = name[i], mu = mu[i], sd = sd[i], se = se[i], lb = lb[i], ub = ub[i], t = tests[i].statistic, df = tests[i].df, p_cor = pvalues[i], p_unc = tests[i].pvalue, d = float(cohensd[i])) for i in range(len(tests))}
+    contrasts = {name[i]: dict(contrast = name[i], mu = mu[i], sd = sd[i], se = se[i], lb = lb[i], ub = ub[i], t = tests[i].statistic, df = tests[i].df, p_cor = pvalues[i], p_unc = tests[i].pvalue, d = float(cohensd[i]), pct_mu = pct_mu[i], pct_sd = pct_sd[i], pct_se = pct_se[i], pct_lb = pct_lb[i], pct_ub = pct_ub[i]) for i in range(len(tests))}
 
     '''
     Begin report
@@ -347,7 +435,7 @@ if __name__ == '__main__':
     html = '<pre>'
     for contrast in contrasts: 
         contrast = contrasts[contrast]
-        html += f'{contrast["contrast"]}: mu={contrast["mu"]}, sd={contrast["sd"]}, se={contrast["se"]}, lb={contrast["lb"]}, ub={contrast["ub"]}, t={contrast["t"]}, df={contrast["df"]}, p_cor={contrast["p_cor"]}, p_unc={contrast["p_unc"]}, d={contrast["d"]}<br />'
+        html += f'{contrast["contrast"]}: mu={contrast["mu"]}, sd={contrast["sd"]}, se={contrast["se"]}, lb={contrast["lb"]}, ub={contrast["ub"]}, t={contrast["t"]}, df={contrast["df"]}, p_cor={contrast["p_cor"]}, p_unc={contrast["p_unc"]}, d={contrast["d"]}, pct_mu={contrast["pct_mu"]}, pct_sd={contrast["pct_sd"]}, pct_se={contrast["pct_se"]}, pct_lb={contrast["pct_lb"]}, pct_ub={contrast["pct_ub"]}<br />'
     html += '</pre>'
     report.add_html(title = 'Contrasts', html = html)
     

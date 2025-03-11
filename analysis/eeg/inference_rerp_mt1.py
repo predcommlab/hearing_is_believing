@@ -101,10 +101,7 @@ if __name__ == '__main__':
     
     # make this a whole-brain analysis
     r_wb = np.mean(r, axis = 2)
-    
-    # z-score
-    #r_wb = (r_wb - r_wb.mean(axis = 1, keepdims = True)) / r_wb.std(axis = 1, keepdims = True)
-    
+
     '''
     One sample tests
     '''
@@ -145,6 +142,10 @@ if __name__ == '__main__':
     sd = []
     se = []
     lb, ub = [], []
+    pct = []
+    pct_sd = []
+    pct_se = []
+    pct_lb, pct_ub = [], []
     
      # run contrasts in wb
     for i in range(r_wb.shape[1]):
@@ -155,24 +156,39 @@ if __name__ == '__main__':
             tests.append(scipy.stats.ttest_rel(r_wb[:,i], r_wb[:,j]))
             cohensd.append(rsa.stats.cohens_d(r_wb[:,i], r_wb[:,j], paired = True).squeeze())
             
+            # over differences
             x = r_wb[:,i] - r_wb[:,j]
             mu_x = x.mean()
             sd_x = x.std()
             se_x = rsa.stats.bootstrap_se(x)
             lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
-            
+
             mu.append(mu_x)
             sd.append(sd_x)
             se.append(se_x)
             lb.append(lb_x)
             ub.append(ub_x)
+
+            # over percentage differences
+            x = ((r_wb[:,i] / r_wb[:,j]) - 1) * 100
+            mu_x = x.mean()
+            sd_x = x.std()
+            se_x = rsa.stats.bootstrap_se(x)
+            lb_x, ub_x = mu_x - 1.96 * se_x, mu_x + 1.96 * se_x
+
+            pct.append(mu_x)
+            pct_sd.append(sd_x)
+            pct_se.append(se_x)
+            pct_lb.append(lb_x)
+            pct_ub.append(ub_x)
+
     
     # correct p-values
     pvalues = np.array([test.pvalue for test in tests])
     pvalues = rsa.stats.bonferroni_holm(pvalues)
 
     # summarise
-    contrasts = {name[i]: dict(contrast = name[i], mu = mu[i], sd = sd[i], se = se[i], lb = lb[i], ub = ub[i], t = tests[i].statistic, df = tests[i].df, p_cor = pvalues[i], p_unc = tests[i].pvalue, d = float(cohensd[i])) for i in range(len(tests))}
+    contrasts = {name[i]: dict(contrast = name[i], mu = mu[i], sd = sd[i], se = se[i], lb = lb[i], ub = ub[i], t = tests[i].statistic, df = tests[i].df, p_cor = pvalues[i], p_unc = tests[i].pvalue, d = float(cohensd[i]), pct = pct[i], pct_sd = pct_sd[i], pct_se = pct_se[i], pct_lb = pct_lb[i], pct_ub = pct_ub[i]) for i in range(len(tests))}
     
     '''
     Begin report
@@ -210,7 +226,7 @@ if __name__ == '__main__':
     html = '<pre>'
     for contrast in contrasts: 
         contrast = contrasts[contrast]
-        html += f'{contrast["contrast"]}: mu={contrast["mu"]}, sd={contrast["sd"]}, se={contrast["se"]}, lb={contrast["lb"]}, ub={contrast["ub"]}, t={contrast["t"]}, df={contrast["df"]}, p_cor={contrast["p_cor"]}, p_unc={contrast["p_unc"]}, d={contrast["d"]}<br />'
+        html += f'{contrast["contrast"]}: mu={contrast["mu"]}, sd={contrast["sd"]}, se={contrast["se"]}, lb={contrast["lb"]}, ub={contrast["ub"]}, t={contrast["t"]}, df={contrast["df"]}, p_cor={contrast["p_cor"]}, p_unc={contrast["p_unc"]}, d={contrast["d"]}, pct_mu={contrast["pct"]}, pct_sd={contrast["pct_sd"]}, pct_se={contrast["pct_se"]}, pct_lb={contrast["pct_lb"]}, pct_ub={contrast["pct_ub"]}<br />'
     html += '</pre>'
     report.add_html(title = 'Contrasts', html = html)
     
