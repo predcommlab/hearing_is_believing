@@ -12,7 +12,7 @@ Please cite this work as:
     Hearing is Believing,
     author = {Fabian Schneider, Helen Blank},
     title = {Hearing Is Beliveing},
-    journal = {...}    
+    journal = {...}
 }
 ```
 
@@ -69,12 +69,12 @@ In your terminal, navigate to the top level of your working directory and downlo
 ```bash
 pip install osfclient
 osf init
-osf -p ctrma fetch -r / ./
+osf -p snxqm fetch -r / ./
 ```
 
-Upon the init command, you may be prompted to input your OSF account and the project id, which is `ctrma`. Downloading all data may take a while, as the project is about `50GB`. Please verify you have enough space before trying to download the data.
+Upon the init command, you may be prompted to input your OSF account and the project id, which is `snxqm`. Downloading all data may take a while, as the project is about `50GB`. Please verify you have enough space before trying to download the data.
 
-Alternatively, use your browser to navigate to [https://osf.io/ctrma](https://osf.io/ctrma) and download the full zip. Make sure to extract it to the top-level directory.
+Alternatively, use your browser to navigate to [https://osf.io/snxqm](https://osf.io/snxqm) and download the full zip. Make sure to extract it to the top-level directory.
 
 Once you have obtained the data, please navigate to your root directory and unzip individual folders like so:
 
@@ -149,8 +149,10 @@ device=str      If backend is torch, which device should be used (mps/cuda/cpu)?
 These will dramatically influence computation times. Per default, all scripts will try to use torch with CUDA acceleration. **Note** that the default behaviour of these scripts is to distribute all available CUDA devices across your `n_workers`. If you would like only a specific device to be used, please specify which device should be used, e.g.: 
 
 ```bash
-python my_script.py n_workers=2 device=torch backend=cuda:0
+python my_script.py n_workers=1 device=torch backend=cuda:0
 ```
+
+Note that, if you are using GPUs, it is advisable to use as many workers as you have GPUs available (but no more---this may slow down computations considerably).
 
 ### 💡 Hint: Validate your installation
 If you would like to fully replicate key results from our paper---specifically, refitting our models rather than using the provided solutions---you should now ensure that everything is running smoothly. To do so, please navigate to `./analysis/eeg/` in your terminal. Now, run:
@@ -286,8 +288,11 @@ Running this will compute all relevant statistics and tests. These will be avail
 #### ❕ Optional: Similarity encoding
 If you would like to run similarity encoders from scratch, please run the following script, adjusting parameters [as necessary](#-hint-performance):
 
-```
-python group_rsa_enc.py n_workers=2 backend=torch device=cuda
+```bash
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda b_acoustic=1 b_semantic=0
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda b_acoustic=0 b_semantic=1
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda b_acoustic=1 b_semantic=1
+python inference_rsa_enc.py
 ```
 
 Results from encoders will be available from `/analysis/eeg/data/results/encoding_b0-m0-c0-k5.pkl.gz` and, for the report, `/analysis/eeg/data/results/reports/encoding_b0-m0-c0-k5.html`.
@@ -295,14 +300,16 @@ Results from encoders will be available from `/analysis/eeg/data/results/encodin
 Next, you may rerun encoders while systematically varying the number of top-k predictions considered like so:
 
 ```bash
-python group_rsa_enc_topk.py n_workers=2 backend=torch device=cuda
+python group_rsa_enc_topk.py n_workers=2 backend=torch device=cuda b_acoustic=1 b_semantic=0 n_mod=3
 python inference_rsa_enc_topk.py
 ```
 
 Results from top-k encoding will be available from `/analysis/eeg/data/results/encoding_topk_b0-m0-c0.pkl.gz`and `/analysis/eeg/data/results/reports/encoding_topk_b0-m0-c0.html`. In your report, check which number of k produced the best models. We know, of course, that this is going to be `k=19`, so let us now refit our original similarity encoders to make sure our results remain robust:
 
 ```bash
-python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19 b_acoustic=1 b_semantic=0
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19 b_acoustic=0 b_semantic=1
+python group_rsa_enc.py n_workers=2 backend=torch device=cuda n_topk=19 b_acoustic=1 b_semantic=1
 python inference_rsa_enc.py n_topk=19
 ```
 

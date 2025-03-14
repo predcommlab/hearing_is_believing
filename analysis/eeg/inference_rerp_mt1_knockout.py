@@ -61,6 +61,9 @@ if __name__ == '__main__':
     
     # make a readable label for coefs
     if a_coefs != 'all': a_coefs = ','.join(list(a_coefs.astype(str)))
+
+    # correct s_bsl
+    if s_bsl == 'llm': s_bsl = f'llm{n_features}'
     
     # dump opts
     print(f'------- rERP: MT1 --------')
