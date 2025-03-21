@@ -541,7 +541,7 @@ if __name__ == '__main__':
             if __FLAG_VERBOSE: print(f'PT: {i+1}/{len(practice)} - {global_clock.getTime()}')
             T.ts = global_clock.getTime()
             res = trial.tafc_audio_visual(T, win, port)
-            choice = res.options[0].lower() if res.choice == 'down' else res.options[1].lower() if res.choice == 'up' else res.options[0].lower() if res.target_position == 'down' else res.options[1].lower()
+            choice = res.options[0].lower() if res.correct else res.options[1].lower()
             rtfe.step(-(len(practice)-i), choice, res.context)
             data.write(res)
     
@@ -587,7 +587,7 @@ if __name__ == '__main__':
             # run trial
             T.ts = global_clock.getTime()
             res = trial.tafc_audio_visual(T, win, port)
-            choice = res.options[0].lower() if res.choice == 'down' else res.options[1].lower() if res.choice == 'up' else res.options[0].lower() if res.target_position == 'down' else res.options[1].lower()
+            choice = res.options[0].lower() if res.correct else res.options[1].lower()
             rtfe.step(i, choice, res.context)
             data.write(res)
             last_block += float(res.correct)
@@ -922,7 +922,7 @@ if __name__ == '__main__':
             # run trial
             T.ts = global_clock.getTime()
             res = trial.tafc_audio_visual(T, win, port, feedback = False)
-            choice = res.options[0].lower() if res.choice == 'down' else res.options[1].lower() if res.choice == 'up' else res.options[0].lower() if res.target_position == 'down' else res.options[1].lower()
+            choice = res.options[0].lower() if res.correct else res.options[1].lower()
             rtfe.step(len(trials) + i, choice, res.context)
             data.write(res)
     
