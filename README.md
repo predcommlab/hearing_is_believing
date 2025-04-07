@@ -2,16 +2,15 @@
 *In this repository, all code for experiments and analysis can be found to reproduce results from:*
 
 ```
-Schneider, F., & Blank, H. (2025). Hearing Is Believing.
+Schneider, F., & Blank, H. (submitted). Hearing Is Believing: Direct Evidence of Low-Level Sharpening and High-Level Prediction Errors through Speaker-Specific Priors.
 ```
 
 Please cite this work as:
 
 ```graphql
 @article{
-    Hearing is Believing,
     author = {Fabian Schneider, Helen Blank},
-    title = {Hearing Is Beliveing},
+    title = {Hearing Is Believing: Direct Evidence of Low-Level Sharpening and High-Level Prediction Errors through Speaker-Specific Priors},
     journal = {...}
 }
 ```
@@ -80,24 +79,42 @@ Once you have obtained the data, please navigate to your root directory and unzi
 
 #### 1: On unix:
 ```bash
-unzip ./analysis/eeg/data/raw/audio.zip ./analysis/eeg/data/raw/
-unzip ./analysis/eeg/data/preprocessed/audio.zip ./analysis/eeg/data/preprocessed/audio.zip
-unzip ./analysis/eeg/data/raw/eeg/subs0.zip ./analysis/eeg/data/raw/eeg/
-unzip ./analysis/eeg/data/raw/eeg/subs1.zip ./analysis/eeg/data/raw/eeg/
-unzip ./analysis/eeg/data/raw/eeg/subs2.zip ./analysis/eeg/data/raw/eeg/
-unzip ./analysis/eeg/data/raw/eeg/subs3.zip ./analysis/eeg/data/raw/eeg/
-unzip ./analysis/eeg/data/raw/eeg/subs4.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/raw0.zip ./analysis/eeg/data/raw/
+unzip ./analysis/eeg/data/raw/eeg/raw1.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/raw2.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/raw3.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/raw4.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/raw/eeg/raw5.zip ./analysis/eeg/data/raw/eeg/
+unzip ./analysis/eeg/data/preprocessed/audio/preprocessed0.zip ./analysis/eeg/data/preprocessed/audio/
+unzip ./analysis/eeg/data/preprocessed/audio/w2v2/preprocessed1.zip ./analysis/eeg/data/preprocessed/audio/w2v2/
+unzip ./analysis/eeg/data/preprocessed/preprocessed2.zip ./analysis/eeg/data/preprocessed/
+unzip ./analysis/eeg/data/preprocessed/eeg/preprocessed3.zip ./analysis/eeg/data/preprocessed/eeg/
+unzip ./analysis/eeg/data/preprocessed/eeg/preprocessed4.zip ./analysis/eeg/data/preprocessed/eeg/
+unzip ./analysis/eeg/data/preprocessed/eeg/preprocessed5.zip ./analysis/eeg/data/preprocessed/eeg/
+unzip ./analysis/eeg/data/processed/eeg/processed1.zip ./analysis/eeg/data/processed/eeg/
+unzip ./analysis/eeg/data/processed/eeg/processed2.zip ./analysis/eeg/data/processed/eeg/
+unzip ./analysis/eeg/data/results/results0.zip ./analysis/eeg/data/results/
+unzip ./analysis/spaces/spaces.zip ./analysis/spaces/
 ```
 
 #### 2: On Windows:
 ```bash
-tar -xzf ./analysis/eeg/data/raw/audio.zip -C ./analysis/eeg/data/raw/
-tar -xzf ./analysis/eeg/data/preprocessed/audio.zip -C ./analysis/eeg/data/preprocessed/audio.zip
-tar -xzf ./analysis/eeg/data/raw/eeg/subs0.zip -C ./analysis/eeg/data/raw/eeg/
-tar -xzf ./analysis/eeg/data/raw/eeg/subs1.zip -C ./analysis/eeg/data/raw/eeg/
-tar -xzf ./analysis/eeg/data/raw/eeg/subs2.zip -C ./analysis/eeg/data/raw/eeg/
-tar -xzf ./analysis/eeg/data/raw/eeg/subs3.zip -C ./analysis/eeg/data/raw/eeg/
-tar -xzf ./analysis/eeg/data/raw/eeg/subs4.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/raw0.zip -C ./analysis/eeg/data/raw/
+tar -xzf ./analysis/eeg/data/raw/eeg/raw1.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/raw2.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/raw3.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/raw4.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/raw/eeg/raw5.zip -C ./analysis/eeg/data/raw/eeg/
+tar -xzf ./analysis/eeg/data/preprocessed/audio/preprocessed0.zip -C ./analysis/eeg/data/preprocessed/audio/
+tar -xzf ./analysis/eeg/data/preprocessed/audio/w2v2/preprocessed1.zip -C ./analysis/eeg/data/preprocessed/audio/w2v2/
+tar -xzf ./analysis/eeg/data/preprocessed/preprocessed2.zip -C ./analysis/eeg/data/preprocessed/
+tar -xzf ./analysis/eeg/data/preprocessed/eeg/preprocessed3.zip -C ./analysis/eeg/data/preprocessed/eeg/
+tar -xzf ./analysis/eeg/data/preprocessed/eeg/preprocessed4.zip -C ./analysis/eeg/data/preprocessed/eeg/
+tar -xzf ./analysis/eeg/data/preprocessed/eeg/preprocessed5.zip -C ./analysis/eeg/data/preprocessed/eeg/
+tar -xzf ./analysis/eeg/data/processed/eeg/processed1.zip -C ./analysis/eeg/data/processed/eeg/
+tar -xzf ./analysis/eeg/data/processed/eeg/processed2.zip -C ./analysis/eeg/data/processed/eeg/
+tar -xzf ./analysis/eeg/data/results/results0.zip -C ./analysis/eeg/data/results/
+tar -xzf ./analysis/spaces/spaces.zip -C ./analysis/spaces/
 ```
 
 ## 🗂️ Project structure
