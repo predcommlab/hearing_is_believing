@@ -20,7 +20,7 @@ library(DHARMa);
 
 #### file management
 # setup data files
-setwd("/users/fabianschneider/desktop/university/phd/hearing_is_believing/analysis/eeg/")
+setwd("/users/fabianschneider/desktop/university/phd/fabian_semantic_priors.nosync/analyses/exp4_eeg/")
 df_long <- "./data/preprocessed/beh/all_mt2.csv";
 
 
@@ -53,6 +53,18 @@ data.task <- data[is.na(data$rt) == F,];
 loss <- c(NROW(data) - NROW(data.task), 100 * (1 - NROW(data.task) / NROW(data)));
 
 ### start maximal modelling
+# A quick explanation:
+# Because we want to find the most generalisable model we can, we 
+# are pursing a maximal modeling approach here. Effectively, that
+# means that we keep our fixed effects constant, but try to capture
+# the maximal amount of variance in random effects (i.e., that vary
+# by participant or other random variables in our experiment) to 
+# make sure that our effects of interest really are reliable.
+# You can find more information about this approach here:
+# 
+#   Barr, D.J., Levy, R., Scheepers, C., Tily, H.J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. Journal of Memory and Language, 68, 255-278. 10.1016/j.jml.2012.11.001
+#   Yarkoni, T. (2020). The generalizability crisis. Behavioural and Brain Sciences, 45, e1. 10.1017/S0140525X20001685
+
 model.m1 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no:is_bad:z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|feature:face:context), data = data.task);
 # converges
 isSingular(model.m1); # TRUE
@@ -62,38 +74,13 @@ model.m1 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no:z_fit|sid:context) + (
 isSingular(model.m1); # TRUE
 
 model.m1 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|feature:face:context), data = data.task);
-# fails to converge
-
-model.m1 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus), data = data.task);
 # converges
 isSingular(model.m1); # FALSE
 
-# try readding the slope for bads
-model.m2 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+is_bad+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus), data = data.task);
-# converges
-isSingular(model.m2); # TRUE
-
-# try adding visual features
-model.m2 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|feature:face), data = data.task);
-# converges
-isSingular(model.m2); # TRUE
-
-# try adding individually
-model.m2 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|feature) + (1|face), data = data.task);
-# converges
-isSingular(model.m2); # TRUE
-
-# try only the face
-model.m2 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|face), data = data.task);
-# converges
-isSingular(model.m2); # TRUE
-
-# only feature instead?
-model.m2 <- lmer(log_rt ~ z_no * is_bad * z_fit + (1+z_no+z_fit|sid:context) + (1|sid:target_pos) + (1|sid/stimulus) + (1|feature), data = data.task);
-# converges
-isSingular(model.m2); # TRUE
-
-# well, this was quick.
+# this is a bit of a nice surprise actually
+# because this makes our model fitting
+# procedure very quick. this is kind of
+# everything we'd want in the model already.
 
 ### save best model & get summary
 model.best <- model.m1;
@@ -114,5 +101,5 @@ write.csv(data.pred, './data/processed/beh/mt2/fitted.csv');
 write.csv(results.sum$coefficients, './data/processed/beh/mt2/summary.csv');
 
 # also do the emt real quick
-data.trends <- test(emtrends(model.best, ~ is_bad * z_fit, var = "z_fit"));
+data.trends <- test(emtrends(model.best, ~ is_bad * z_fit, var = "z_fit", at = list(z_fit = c(0)), pbkrtest.limit = 4097), pbkrtest.limit = 4097);
 write.csv(data.trends, './data/processed/beh/mt2/trends.csv');

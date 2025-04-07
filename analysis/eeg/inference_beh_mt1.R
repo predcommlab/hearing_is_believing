@@ -20,7 +20,7 @@ library(DHARMa);
 
 #### file management
 # setup data files
-setwd("/users/fabianschneider/desktop/university/phd/hearing_is_believing/analysis/eeg/")
+setwd("/users/fabianschneider/desktop/university/phd/fabian_semantic_priors.nosync/analyses/exp4_eeg/")
 df_long <- "./data/preprocessed/beh/all_mt1.csv";
 
 
@@ -65,6 +65,19 @@ data.task <- data[is.na(data$rt) == F,];
 loss <- c(NROW(data) - NROW(data.task), 100 * (1 - NROW(data.task) / NROW(data)));
 
 ### start maximal modelling
+# A quick explanation:
+# Because we want to find the most generalisable model we can, we 
+# are pursing a maximal modeling approach here. Effectively, that
+# means that we keep our fixed effects constant, but try to capture
+# the maximal amount of variance in random effects (i.e., that vary
+# by participant or other random variables in our experiment) to 
+# make sure that our effects of interest really are reliable.
+# You can find more information about this approach here:
+# 
+#   Barr, D.J., Levy, R., Scheepers, C., Tily, H.J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. Journal of Memory and Language, 68, 255-278. 10.1016/j.jml.2012.11.001
+#   Yarkoni, T. (2020). The generalizability crisis. Behavioural and Brain Sciences, 45, e1. 10.1017/S0140525X20001685
+
+# let's start with a nice and complex model
 model.m1 <- glmer(chose_a ~ 
                     z_no*kappa + 
                     z_no*z_fit +
@@ -113,13 +126,13 @@ isSingular(model.m2); # FALSE
 anova(model.m1, model.m2)
 # Models:
 #   model.m2: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit | sid:context) + 
-#   model.m2:     (0 + z_no:kappa + kappa | sid)
+#   model.m2:     (0 + kappa + z_no:kappa | sid)
 # model.m1: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit + kappa | 
 #                                                      model.m1:     sid:context)
-# npar   AIC   BIC  logLik deviance  Chisq Df Pr(>Chisq)    
-# model.m2   15 10206 10311 -5087.9    10176                         
-# model.m1   16 10185 10297 -5076.3    10153 23.185  1  1.471e-06 ***
-
+# npar    AIC    BIC  logLik deviance Chisq Df Pr(>Chisq)    
+# model.m2   15 8853.2 8958.3 -4411.6   8823.2                        
+# model.m1   16 8816.7 8928.9 -4392.4   8784.7 38.42  1  5.704e-10 ***
+ 
 # let's try adding in some more REs again to the baseline then
 model.m2 <- glmer(chose_a ~ 
                     z_no*kappa + 
@@ -136,31 +149,21 @@ model.m2 <- glmer(chose_a ~
                     (1+z_no+z_fit+kappa|sid:context) + (1|sid:a_pos), data = data.task, family = binomial(link = 'logit'),
                   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)));
 # converges
-isSingular(model.m2); # TRUE
-# yeah well, there's just no variance there
-
-# try only face:feature
-model.m2 <- glmer(chose_a ~ 
-                    z_no*kappa + 
-                    z_no*z_fit +
-                    (1+z_no+z_fit+kappa|sid:context) + (1|face:feature), data = data.task, family = binomial(link = 'logit'),
-                  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)));
-# converges
 isSingular(model.m2); # FALSE
-# test it against previous
+# okay let's test it
 anova(model.m1, model.m2)
 # Models:
 # model.m1: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit + kappa | 
 #                                                      model.m1:     sid:context)
 # model.m2: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit + kappa | 
 #                                                      model.m2:     sid:context) + (1 | face:feature)
-# npar   AIC   BIC  logLik deviance  Chisq Df Pr(>Chisq)  
-# model.m1   16 10185 10297 -5076.3    10153                       
-# model.m2   17 10183 10302 -5074.6    10149 3.3618  1    0.06672 .
+# npar    AIC    BIC  logLik deviance  Chisq Df Pr(>Chisq)  
+# model.m1   16 8816.7 8928.9 -4392.4   8784.7                       
+# model.m2   17 8813.4 8932.6 -4389.7   8779.4 5.3304  1    0.02096 *
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-# it seems like the original model was pretty good
-# let's just compare it to a null model real quick
-# to check the slopes
+# let's compare to a null model real quick
 model.m0 <- glmer(chose_a ~ 
                     z_no*kappa + 
                     z_no*z_fit +
@@ -169,21 +172,21 @@ model.m0 <- glmer(chose_a ~
 # converges
 isSingular(model.m0); # FALSE
 # test against model
-anova(model.m0, model.m1)
+anova(model.m0, model.m2)
 # Models:
 #   model.m0: chose_a ~ z_no * kappa + z_no * z_fit + (1 | sid:context)
-# model.m1: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit + kappa | 
-#                                                      model.m1:     sid:context)
-# npar   AIC   BIC  logLik deviance  Chisq Df Pr(>Chisq)    
-# model.m0    7 10293 10342 -5139.6    10279                         
-# model.m1   16 10185 10297 -5076.3    10153 126.64  9  < 2.2e-16 ***
+# model.m2: chose_a ~ z_no * kappa + z_no * z_fit + (1 + z_no + z_fit + kappa | 
+#                                                      model.m2:     sid:context) + (1 | face:feature)
+# npar    AIC    BIC  logLik deviance  Chisq Df Pr(>Chisq)    
+# model.m0    7 9104.5 9153.6 -4545.3   9090.5                         
+# model.m2   17 8813.4 8932.6 -4389.7   8779.4 311.12 10  < 2.2e-16 ***
 #   ---
 #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 # okay then, that was pretty quick.
 
 ### save best model & get summary
-model.best <- model.m1;
+model.best <- model.m2;
 results.sum <- summary(model.best);
 
 ### inspect model
@@ -194,7 +197,7 @@ plot(sim) # looks pretty good
 plotResiduals(sim, form = data.task$z_no) # ok
 plotResiduals(sim, form = data.task$kappa) # ok
 plotResiduals(sim, form = data.task$z_fit) # ok
-plotResiduals(sim, form = data.task$sid) # ok
+plotResiduals(sim, form = data.task$sid) # not ideal but acceptable
 plotResiduals(sim, form = data.task$context) # not ideal but acceptable i think given residuals overall are good and this is a design thing
 # overall, I think we can be fairly happy
 # with the model fit here.
