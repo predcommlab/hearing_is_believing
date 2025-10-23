@@ -57,10 +57,10 @@ class RTFE:
         self.dir = dir
 
         # load reduced glove
-        self.G = emb.glove.load_embedding(f_in = './data/preprocessed/misc/glove/w2v_50D.txt')
+        self.G = emb.glove.load_embedding(f_in = '../../exp4_eeg/resources/model/w2v_50D.txt')
         
         # load priors
-        with open('./data/preprocessed/misc/glove/priors.npy', 'rb') as f:
+        with open('../../exp4_eeg/resources/model/priors.npy', 'rb') as f:
             self.priors = np.load(f)
         
         # setup speakers
@@ -129,7 +129,7 @@ def worker(task: tuple[Any, str, str, int, int], **kwargs: Any) -> bool:
     '''
 
     # parameters
-    sid, pid, dir, generalised, unspecific, congruent, incongruent, f_in = task
+    sid, pid, dir, generalised, unspecific, random, congruent, incongruent, f_in = task
     
     # status
     print(f'...{sid}')
@@ -150,6 +150,12 @@ def worker(task: tuple[Any, str, str, int, int], **kwargs: Any) -> bool:
         if generalised:
             # correct option
             word = trial.options_0
+        elif random:
+            # random option
+            if np.random.choice([0, 1]) == 0:
+                word = trial.options_0
+            else:
+                word = trial.options_1
         else:
             # choice
             word = trial.options_0 if (trial.correct == True) else trial.options_1 if ((trial.correct == False) & (np.isnan(trial.rt) == False)) else trial.options_0
@@ -171,9 +177,9 @@ def worker(task: tuple[Any, str, str, int, int], **kwargs: Any) -> bool:
     return True
 
 # setup paths
-f_T = '../spaces/dumps/stimuli_pairs_from_old.xlsx'
-f_C = '../spaces/dumps/stimuli_pairs_control.xlsx'
-f_P = '../spaces/dumps/stimuli_pairs_practice.xlsx'
+f_T = '../../semantic_spaces/dumps/stimuli_pairs_from_old.xlsx'
+f_C = '../../semantic_spaces/dumps/stimuli_pairs_control.xlsx'
+f_P = '../../semantic_spaces/dumps/stimuli_pairs_practice.xlsx'
 
 # system arguments
 use_gpt = '-gpt' in sys.argv[1:]
@@ -183,6 +189,7 @@ use_llama = '-llama' in sys.argv[1:] if not use_gpt else False
 # setup mode
 generalised = '-generalised' in sys.argv[1:]
 unspecific = '-unspecific' in sys.argv[1:]
+random = '-random' in sys.argv[1:]
 congruent = '-congruent' in sys.argv[1:]
 incongruent = '-incongruent' in sys.argv[1:]
 
@@ -200,6 +207,8 @@ if generalised:
     folder += '-generalised'
 if unspecific:
     folder += '-unspecific'
+if random:
+    folder += '-random'
 if congruent:
     folder += '-congruent'
 if incongruent:
@@ -215,10 +224,10 @@ if __name__ == "__main__":
 
     # load glove
     print('Loading GloVe...')
-    f_E = '../spaces/text-embedding-ada-002/w2v-50D.txt' if use_gpt else \
-          '../spaces/bert-base-german-cased/w2v-50D.txt' if use_bert else \
-          '../spaces/llama-7b/w2v-50D.txt' if use_llama else \
-          '../spaces/glove-german/w2v_50D.txt'
+    f_E = '../../semantic_spaces/text-embedding-ada-002/w2v-50D.txt' if use_gpt else \
+          '../../semantic_spaces/bert-base-german-cased/w2v-50D.txt' if use_bert else \
+          '../../semantic_spaces/llama-7b/w2v-50D.txt' if use_llama else \
+          '../../semantic_spaces/glove-german/w2v_50D.txt'
     G = emb.glove.load_embedding(f_in = f_E)
     
     # make sure super directory exists
@@ -231,7 +240,7 @@ if __name__ == "__main__":
     for sub in data.Subjects.select(lambda sub: int(sub.sid) >= 2):
         dir = f'./data/raw/{folder}/sub{sub.sid}/'
         if os.path.isdir(dir) == False: os.mkdir(dir)
-        T.append((sub.sid, sub.pid, dir, generalised, unspecific, congruent, incongruent, f'./data/raw/beh/sub{sub.sid}/{sub.pid}.csv'))
+        T.append((sub.sid, sub.pid, dir, generalised, unspecific, random, congruent, incongruent, f'./data/raw/beh/sub{sub.sid}/{sub.pid}.csv'))
     
     # send tasks to workers
     print('Spawning workers...')
