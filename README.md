@@ -2,17 +2,7 @@
 *In this repository, all code for experiments and analysis can be found to reproduce results from:*
 
 ```
-Schneider, F., & Blank, H. (submitted). Hearing Is Believing: Direct Evidence of Low-Level Sharpening and High-Level Prediction Errors through Speaker-Specific Priors.
-```
-
-Please cite this work as:
-
-```graphql
-@article{
-    author = {Fabian Schneider, Helen Blank},
-    title = {Hearing Is Believing: Direct Evidence of Low-Level Sharpening and High-Level Prediction Errors through Speaker-Specific Priors},
-    journal = {...}
-}
+Schneider, F., & Blank, H. (2025). Sensory sharpening and semantic prediction errors unify competing models of predictive processing in in human speech comprehension. bioRxiv. 10.1101/2025.07.23.666354
 ```
 
 ## 🚀 Getting started
